@@ -1,12 +1,15 @@
+using Microsoft.Extensions.Options;
+
 namespace OpenTelemetry.Heartbeat.Monitor;
 
 public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
 
-    public Worker(ILogger<Worker> logger)
+    public Worker(ILogger<Worker> logger, IOptions<SearchOptions> options)
     {
         _logger = logger;
+        _ = options.Value;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
