@@ -9,7 +9,7 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddOptions<SearchOptions>().Bind(context.Configuration.GetSection(SearchOptions.SectionName));
         services.AddScoped<IFileSystem, FileSystem>();
         services.AddScoped<IMonitorDefinitionSerializer, MonitorDefinitionSerializer>();
-        services.AddScoped<IMonitorDefinitionRepository, IMonitorDefinitionRepository>();
+        services.AddScoped<IMonitorDefinitionRepository, MonitorDefinitionRepository>();
 
         services.AddHostedService<Worker>();
     })
