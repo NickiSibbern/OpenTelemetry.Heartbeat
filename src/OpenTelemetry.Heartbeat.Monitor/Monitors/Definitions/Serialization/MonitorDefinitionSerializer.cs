@@ -1,8 +1,8 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using OpenTelemetry.Heartbeat.Monitor.Monitors.Models;
+using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Models;
 
-namespace OpenTelemetry.Heartbeat.Monitor.Monitors.Serialization;
+namespace OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Serialization;
 
 public interface IMonitorDefinitionSerializer
 {

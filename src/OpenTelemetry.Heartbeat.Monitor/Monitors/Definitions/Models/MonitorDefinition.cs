@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace OpenTelemetry.Heartbeat.Monitor.Monitors.Models;
+namespace OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Models;
 
 public record MonitorDefinition
 {

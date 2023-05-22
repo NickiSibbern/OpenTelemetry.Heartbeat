@@ -3,11 +3,11 @@ using Atc.Test;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
-using OpenTelemetry.Heartbeat.Monitor.Monitors;
-using OpenTelemetry.Heartbeat.Monitor.Monitors.Models;
-using OpenTelemetry.Heartbeat.Monitor.Monitors.Serialization;
+using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions;
+using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Models;
+using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Serialization;
 
-namespace OpenTelemetry.Heartbeat.Monitor.Tests.Monitors;
+namespace OpenTelemetry.Heartbeat.Monitor.Tests.Monitors.Definitions;
 
 public class MonitorDefinitionRepositoryTests
 {

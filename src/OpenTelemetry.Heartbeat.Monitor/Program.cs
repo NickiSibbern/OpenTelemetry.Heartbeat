@@ -1,7 +1,8 @@
 using System.IO.Abstractions;
 using OpenTelemetry.Heartbeat.Monitor;
 using OpenTelemetry.Heartbeat.Monitor.Monitors;
-using OpenTelemetry.Heartbeat.Monitor.Monitors.Serialization;
+using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions;
+using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Serialization;
 
 IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>

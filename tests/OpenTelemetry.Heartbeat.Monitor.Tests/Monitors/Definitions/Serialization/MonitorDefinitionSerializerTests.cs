@@ -4,10 +4,10 @@ using AutoFixture.Xunit2;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using OpenTelemetry.Heartbeat.Monitor.Monitors.Models;
-using OpenTelemetry.Heartbeat.Monitor.Monitors.Serialization;
+using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Models;
+using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Serialization;
 
-namespace OpenTelemetry.Heartbeat.Monitor.Tests.Monitors.Serialization;
+namespace OpenTelemetry.Heartbeat.Monitor.Tests.Monitors.Definitions.Serialization;
 
 public class MonitorDefinitionSerializerTests
 {

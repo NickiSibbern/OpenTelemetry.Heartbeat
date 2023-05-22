@@ -1,10 +1,10 @@
 using System.Collections.Concurrent;
 using System.IO.Abstractions;
 using Microsoft.Extensions.Options;
-using OpenTelemetry.Heartbeat.Monitor.Monitors.Models;
-using OpenTelemetry.Heartbeat.Monitor.Monitors.Serialization;
+using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Models;
+using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Serialization;
 
-namespace OpenTelemetry.Heartbeat.Monitor.Monitors;
+namespace OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions;
 
 public interface IMonitorDefinitionRepository
 {
