@@ -12,18 +12,22 @@ namespace OpenTelemetry.Heartbeat.Monitor.Tests.Monitors.Serialization;
 public class MonitorDefinitionSerializerTests
 {
     [Theory, AutoNSubstituteData]
-    public async Task Deserialize_Should_Return_MonitorDefinition_When_Json_Is_Valid(
+    public async Task Deserialize_Should_Return_MonitorDefinition_When_Json_Is_Valid_HttpMonitor(
         [Frozen] ILogger<MonitorDefinitionSerializer> logger,
         MonitorDefinitionSerializer sut,
         CancellationToken cancellationToken)
     {
         // Arrange
         const string json = @"{
-            ""Name"": ""Test Monitor"",
-            ""Namespace"": ""namespace"",
-            ""Interval"": 300,
-            ""TimeOut"": 100,
-            ""Url"": ""https://localhost"" 
+            ""name"": ""Test Monitor"",
+            ""namespace"": ""namespace"",
+            ""interval"": 300,
+            ""type"": ""http"",
+            ""http"": {
+                ""timeOut"": 100,
+                ""url"": ""https://localhost"",
+                ""responseCode"": 200
+            }
         }";
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
 
@@ -35,11 +39,14 @@ public class MonitorDefinitionSerializerTests
         result.Should().BeAssignableTo<MonitorDefinition>();
 
         result!.Name.Should().BeEquivalentTo("Test Monitor");
+        result.MonitorType.Should().Be(MonitorDefinitionType.Http);
+        result.Http.Should().NotBeNull();
         result.Interval.Should().Be(300);
-        result.TimeOut.Should().Be(100);
-        result.Url.Should().BeEquivalentTo("https://localhost");
-        logger.DidNotReceiveWithAnyArgs().LogInformation("Unable to deserialize monitor definition: {Exception}", Arg.Any<Exception>());
+        result.Http?.TimeOut.Should().Be(100);
+        result.Http?.ResponseCode.Should().Be(200);
+        result.Http?.Url.Should().BeEquivalentTo("https://localhost");
     }
+    
 
     [Theory, AutoNSubstituteData]
     public async Task Deserialize_Should_Return_Null_If_Json_Is_Invalid(

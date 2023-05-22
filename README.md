@@ -1,13 +1,19 @@
 # OpenTelemetry.Heartbeat
 A simple worker that Converts files into probes that is exposed as a metric. The file is expected to be a json file with the following format:
 
+
+**HttpMonitor**
 ```json
 {
   "name": "My Service",
   "namespace": "My Namespace",
   "interval": 10,
-  "timeout": 5,
-  "url": "https://myservice/healthz"
+  "type": "http",
+  "http": {
+    "timeOut": 100,
+    "url": "https://localhost",
+    "responseCode": 200
+  }
 }
 ```
 the metric will follow the [Otel standard](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/semantic_conventions/README.md) and contain the following labels

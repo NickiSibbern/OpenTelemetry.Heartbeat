@@ -21,17 +21,17 @@ public class MonitorDefinitionRepositoryTests
         // Arrange
         var options = Options.Create(new SearchOptions { RootDirectory = "/root", SearchPattern = "Heartbeat.json", IncludeSubDirectories = true });
 
-        var oldFile = new MockFileData(CreateJsonString("service", "foo", 10, 5, "http://foo.com"))
+        var oldFile = new MockFileData(CreateHttpMonitorJson("service", "foo", 200, 10, 5, "http://foo.com"))
         {
             CreationTime = creationTime.AddHours(-2)
         };
         
-        var newFile = new MockFileData(CreateJsonString("service", "foo", 15, 2, "http://foo.com"))
+        var newFile = new MockFileData(CreateHttpMonitorJson("service", "foo", 200, 15, 2, "http://foo.com"))
         {
             CreationTime = creationTime.AddHours(-1)
         };
         
-        var anotherFile = new MockFileData(CreateJsonString("another-service", "foo", 15, 2, "http://foo.com"))
+        var anotherFile = new MockFileData(CreateHttpMonitorJson("another-service", "foo", 200, 15, 2, "http://foo.com"))
         {
             CreationTime = creationTime.AddHours(-1)
         };
@@ -47,7 +47,7 @@ public class MonitorDefinitionRepositoryTests
 
         // Assert
         result.Count.Should().BeGreaterThan(1);
-        result.Should().Contain(x => x.Name == "service" && x.Interval == 15 && x.TimeOut == 2);
+        result.Should().Contain(x => x.Name == "service" && x.Interval == 15 && x.Http.TimeOut == 2);
         result.Should().Contain(x => x.Name == "another-service");
     }
     
@@ -77,7 +77,7 @@ public class MonitorDefinitionRepositoryTests
     
     // Top / sub directories
     [Theory, AutoNSubstituteData]
-    public async Task GetFiles_Should_Only_Return_Top_Level_Files_If_IncludeSubDirectorties_Is_False(
+    public async Task GetFiles_Should_Only_Return_Top_Level_Files_If_IncludeSubDirectories_Is_False(
         IMonitorDefinitionSerializer serializer,
         MockFileSystem fileSystem,
         Stream stream,
@@ -100,14 +100,18 @@ public class MonitorDefinitionRepositoryTests
         result.Should().HaveCount(1);
     }
     
-    private static string CreateJsonString (string name, string @namespace, int interval, int timeout, string url)
+    private static string CreateHttpMonitorJson (string name, string @namespace, int responseCode, int interval, int timeout, string url)
     {
         return $@"{{
-            ""Name"": ""{name}"",
-            ""Namespace"": ""{@namespace}"",
-            ""Interval"": {interval},
-            ""TimeOut"": {timeout},
-            ""Url"": ""{url}"" 
+            ""name"": ""{name}"",
+            ""namespace"": ""{@namespace}"",
+            ""interval"": {interval},
+            ""type"": ""Http"",
+            ""http"": {{
+                ""ResponseCode"": {responseCode},
+                ""TimeOut"": {timeout},
+                ""Url"": ""{url}""
+            }}
         }}";
     }
 }
