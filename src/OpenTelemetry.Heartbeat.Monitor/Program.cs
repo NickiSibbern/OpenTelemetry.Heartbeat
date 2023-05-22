@@ -1,13 +1,14 @@
 using System.IO.Abstractions;
 using OpenTelemetry.Heartbeat.Monitor;
-using OpenTelemetry.Heartbeat.Monitor.Monitors;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions;
-using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Serialization;
+using OpenTelemetry.Heartbeat.Monitor.Settings;
 
 IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
     {
-        services.AddOptions<SearchOptions>().Bind(context.Configuration.GetSection(SearchOptions.SectionName));
+        services.AddOptions<SearchSettings>().Bind(context.Configuration.GetSection(nameof(SearchSettings)));
+        services.AddOptions<MetricSettings>().Bind(context.Configuration.GetSection(nameof(MetricSettings)));
+        
         services.AddScoped<IFileSystem, FileSystem>();
         services.AddScoped<IMonitorDefinitionSerializer, MonitorDefinitionSerializer>();
         services.AddScoped<IMonitorDefinitionRepository, MonitorDefinitionRepository>();

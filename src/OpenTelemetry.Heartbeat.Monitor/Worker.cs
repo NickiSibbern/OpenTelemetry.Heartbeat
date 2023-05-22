@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using OpenTelemetry.Heartbeat.Monitor.Settings;
 
 namespace OpenTelemetry.Heartbeat.Monitor;
 
@@ -6,7 +7,7 @@ public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
 
-    public Worker(ILogger<Worker> logger, IOptions<SearchOptions> options)
+    public Worker(ILogger<Worker> logger, IOptions<SearchSettings> options)
     {
         _logger = logger;
         _ = options.Value;

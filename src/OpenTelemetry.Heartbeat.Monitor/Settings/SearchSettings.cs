@@ -1,9 +1,7 @@
-namespace OpenTelemetry.Heartbeat.Monitor;
+namespace OpenTelemetry.Heartbeat.Monitor.Settings;
 
-public class SearchOptions
+public class SearchSettings
 {
-    public const string SectionName = "SearchSettings";
-
     public required string RootDirectory { get; init; }
     public required string SearchPattern { get; init; }
     public required bool IncludeSubDirectories { get; init; }

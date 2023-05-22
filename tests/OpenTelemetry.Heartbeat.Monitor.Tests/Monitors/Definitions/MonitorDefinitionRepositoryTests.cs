@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 using NSubstitute;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Models;
-using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Serialization;
+using OpenTelemetry.Heartbeat.Monitor.Settings;
 
 namespace OpenTelemetry.Heartbeat.Monitor.Tests.Monitors.Definitions;
 
@@ -19,7 +19,7 @@ public class MonitorDefinitionRepositoryTests
         CancellationToken cancellationToken)
     {
         // Arrange
-        var options = Options.Create(new SearchOptions { RootDirectory = "/root", SearchPattern = "Heartbeat.json", IncludeSubDirectories = true });
+        var options = Options.Create(new SearchSettings { RootDirectory = "/root", SearchPattern = "Heartbeat.json", IncludeSubDirectories = true });
 
         var oldFile = new MockFileData(CreateHttpMonitorJson("service", "foo", 200, 10, 5, "http://foo.com"))
         {
@@ -60,7 +60,7 @@ public class MonitorDefinitionRepositoryTests
         CancellationToken cancellationToken)
     {
         // Arrange
-        var options = Options.Create(new SearchOptions { RootDirectory = "/root", SearchPattern = "Heartbeat.json", IncludeSubDirectories = true });
+        var options = Options.Create(new SearchSettings { RootDirectory = "/root", SearchPattern = "Heartbeat.json", IncludeSubDirectories = true });
         serializer.DeserializeAsync(stream, cancellationToken).ReturnsForAnyArgs(monitorDefinition);
         
         fileSystem.AddFile("/root/v1.0.0/Heartbeat.json", new MockFileData(string.Empty));
@@ -85,7 +85,7 @@ public class MonitorDefinitionRepositoryTests
         CancellationToken cancellationToken)
     {
         // Arrange
-        var options = Options.Create(new SearchOptions { RootDirectory = "/root", SearchPattern = "Heartbeat.json", IncludeSubDirectories = true });
+        var options = Options.Create(new SearchSettings { RootDirectory = "/root", SearchPattern = "Heartbeat.json", IncludeSubDirectories = true });
         serializer.DeserializeAsync(stream, cancellationToken).ReturnsForAnyArgs(monitorDefinition);
         
         fileSystem.AddFile("/root/Heartbeat.json", new MockFileData(string.Empty));

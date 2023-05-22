@@ -7,10 +7,10 @@ A simple worker that Converts files into probes that is exposed as a metric. The
 {
   "name": "My Service",
   "namespace": "My Namespace",
-  "interval": 10,
+  "interval": 1000, // in milliseconds
   "type": "http",
   "http": {
-    "timeOut": 100,
+    "timeOut": 100, // in milliseconds
     "url": "https://localhost",
     "responseCode": 200
   }

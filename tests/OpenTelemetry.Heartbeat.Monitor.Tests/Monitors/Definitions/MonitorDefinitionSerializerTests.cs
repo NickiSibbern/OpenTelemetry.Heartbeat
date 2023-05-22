@@ -4,16 +4,15 @@ using AutoFixture.Xunit2;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Models;
-using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Serialization;
 
-namespace OpenTelemetry.Heartbeat.Monitor.Tests.Monitors.Definitions.Serialization;
+namespace OpenTelemetry.Heartbeat.Monitor.Tests.Monitors.Definitions;
 
 public class MonitorDefinitionSerializerTests
 {
     [Theory, AutoNSubstituteData]
     public async Task Deserialize_Should_Return_MonitorDefinition_When_Json_Is_Valid_HttpMonitor(
-        [Frozen] ILogger<MonitorDefinitionSerializer> logger,
         MonitorDefinitionSerializer sut,
         CancellationToken cancellationToken)
     {
@@ -44,13 +43,12 @@ public class MonitorDefinitionSerializerTests
         result.Interval.Should().Be(300);
         result.Http?.TimeOut.Should().Be(100);
         result.Http?.ResponseCode.Should().Be(200);
-        result.Http?.Url.Should().BeEquivalentTo("https://localhost");
+        result.Http?.Url.Should().BeEquivalentTo(new Uri("https://localhost"));
     }
     
 
     [Theory, AutoNSubstituteData]
     public async Task Deserialize_Should_Return_Null_If_Json_Is_Invalid(
-        [Frozen] ILogger<MonitorDefinitionSerializer> logger,
         MonitorDefinitionSerializer sut,
         CancellationToken cancellationToken)
     {
