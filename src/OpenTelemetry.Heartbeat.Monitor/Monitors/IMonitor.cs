@@ -1,8 +1,13 @@
-using OpenTelemetry.Heartbeat.Monitor.Monitors.Models;
+using FluentResults;
 
 namespace OpenTelemetry.Heartbeat.Monitor.Monitors;
 
 public interface IMonitor
 {
-    Task<MonitorResult> ExecuteAsync(CancellationToken? cancellationToken = default);
+    /// <summary>
+    /// Execute the monitor and return a result
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<Result<string>> ExecuteAsync(CancellationToken? cancellationToken = default);
 }

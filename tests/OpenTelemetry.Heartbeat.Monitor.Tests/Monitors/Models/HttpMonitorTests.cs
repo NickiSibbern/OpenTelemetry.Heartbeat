@@ -2,6 +2,8 @@ using System.Diagnostics.Metrics;
 using System.Net;
 using Atc.Test;
 using FluentAssertions;
+using NSubstitute;
+using OpenTelemetry.Heartbeat.Monitor.Abstractions;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Models;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Models;
 using OpenTelemetry.Heartbeat.Monitor.Settings;
@@ -16,13 +18,14 @@ public class HttpMonitorTests
         MonitorDefinition monitorDefinition,
         MockHttpMessageHandler mockHttpClient,
         MetricSettings settings,
+        IDateTimeService dateTimeService,
         Meter meter)
     {
         // Arrange
         var httpClient = mockHttpClient.ToHttpClient();
 
         // Act
-        var act = () => new HttpMonitor(monitorDefinition with { Http = null }, httpClient, settings, meter);
+        var act = () => new HttpMonitor(monitorDefinition with { Http = null }, httpClient, dateTimeService, settings, meter);
 
         // Assert
         act.Should().Throw<ArgumentNullException>();
@@ -44,11 +47,13 @@ public class HttpMonitorTests
         MonitorDefinition monitorDefinition,
         MockHttpMessageHandler mockHttpClient,
         MetricSettings settings,
+        IDateTimeService dateTimeService,
         Meter meter,
         CancellationTokenSource cancellationTokenSource,
         Uri requestUri)
     {
         // Arrange
+        dateTimeService.Now.Returns(DateTimeOffset.Now);
         mockHttpClient.When("*").Respond(HttpStatusCode.Accepted);
         cancellationTokenSource.Cancel();
 
@@ -56,6 +61,7 @@ public class HttpMonitorTests
         var sut = new HttpMonitor(
             monitorDefinition with { Http = new HttpMonitorDefinition(requestUri, 10000, 200) },
             httpClient,
+            dateTimeService,
             settings,
             meter);
 
@@ -64,7 +70,7 @@ public class HttpMonitorTests
 
         // Assert
         result.IsSuccess.Should().Be(false);
-        result.ErrorMessage.Should().Be("The operation was canceled.");
+        result.Errors.Select(error => error.Message).Should().Contain("The operation was canceled.");
     }
 
     [Theory, AutoNSubstituteData]
@@ -72,17 +78,20 @@ public class HttpMonitorTests
         MonitorDefinition monitorDefinition,
         MockHttpMessageHandler mockHttpClient,
         MetricSettings settings,
+        IDateTimeService dateTimeService,
         Meter meter,
-        CancellationToken cancellationToken,
-        Uri requestUri)
+        Uri requestUri,
+        CancellationToken cancellationToken)
     {
         // Arrange
+        dateTimeService.Now.Returns(DateTimeOffset.Now);
         mockHttpClient.When("*").Respond(HttpStatusCode.OK);
 
         var httpClient = mockHttpClient.ToHttpClient();
         var sut = new HttpMonitor(
             monitorDefinition with { Http = new HttpMonitorDefinition(requestUri, 1000, (int)HttpStatusCode.OK) },
             httpClient,
+            dateTimeService,
             settings,
             meter);
 
@@ -91,7 +100,37 @@ public class HttpMonitorTests
 
         // Assert
         result.IsSuccess.Should().Be(true);
-        result.ErrorMessage.Should().BeNull();
+    }
+    
+    [Theory, AutoNSubstituteData]
+    public async Task ExecuteAsync_Should_Return_Failure_If_It_Should_Not_Run_Yet(
+        MonitorDefinition monitorDefinition,
+        MockHttpMessageHandler mockHttpClient,
+        MetricSettings settings,
+        IDateTimeService dateTimeService,
+        Meter meter,
+        Uri requestUri,
+        CancellationToken cancellationToken)
+    {
+        // Arrange
+        dateTimeService.Now.Returns(DateTimeOffset.Now);
+        mockHttpClient.When("*").Respond(HttpStatusCode.InternalServerError);
+
+        var httpClient = mockHttpClient.ToHttpClient();
+        var sut = new HttpMonitor(
+            monitorDefinition with { Interval = 20000, Http = new HttpMonitorDefinition(requestUri, 1000, (int)HttpStatusCode.OK) },
+            httpClient,
+            dateTimeService,
+            settings,
+            meter);
+
+        // Act
+        await sut.ExecuteAsync(cancellationToken);
+        var result = await sut.ExecuteAsync(cancellationToken); // Second run to test that we don't run it again, before interval has passed
+
+        // Assert
+        result.IsSuccess.Should().Be(false);
+        result.Errors.Select(error => error.Message).Should().Contain($"Monitor for: {monitorDefinition.Name} should not run yet");
     }
 
     [Theory, AutoNSubstituteData]
@@ -99,17 +138,20 @@ public class HttpMonitorTests
         MonitorDefinition monitorDefinition,
         MockHttpMessageHandler mockHttpClient,
         MetricSettings settings,
+        IDateTimeService dateTimeService,
         Meter meter,
-        CancellationToken cancellationToken,
-        Uri requestUri)
+        Uri requestUri,
+        CancellationToken cancellationToken)
     {
         // Arrange
+        dateTimeService.Now.Returns(DateTimeOffset.Now);
         mockHttpClient.When("*").Respond(HttpStatusCode.InternalServerError);
 
         var httpClient = mockHttpClient.ToHttpClient();
         var sut = new HttpMonitor(
             monitorDefinition with { Http = new HttpMonitorDefinition(requestUri, 1000, (int)HttpStatusCode.OK) },
             httpClient,
+            dateTimeService,
             settings,
             meter);
 
@@ -118,7 +160,6 @@ public class HttpMonitorTests
 
         // Assert
         result.IsSuccess.Should().Be(false);
-        result.ErrorMessage.Should().NotBeNullOrEmpty();
     }
 
     [Theory, AutoNSubstituteData]
@@ -126,21 +167,23 @@ public class HttpMonitorTests
         MonitorDefinition monitorDefinition,
         MockHttpMessageHandler mockHttpClient,
         MetricSettings settings,
+        IDateTimeService dateTimeService,
         Meter meter,
-        CancellationToken cancellationToken,
-        Exception exception)
+        Exception exception,
+        CancellationToken cancellationToken)
     {
         // Arrange
+        dateTimeService.Now.Returns(DateTimeOffset.Now);
         mockHttpClient.When("*").Respond(() => throw exception);
         var httpClient = mockHttpClient.ToHttpClient();
-        var sut = new HttpMonitor(monitorDefinition, httpClient, settings, meter);
+        var sut = new HttpMonitor(monitorDefinition, httpClient, dateTimeService, settings, meter);
 
         // Act
         var result = await sut.ExecuteAsync(cancellationToken);
 
         // Assert
         result.IsSuccess.Should().Be(false);
-        result.ErrorMessage.Should().Be(exception.Message);
+        result.Errors.Select(error => error.Message).Should().Contain(exception.Message);
     }
 
     [Theory, AutoNSubstituteData]
@@ -148,19 +191,21 @@ public class HttpMonitorTests
         MonitorDefinition monitorDefinition,
         MockHttpMessageHandler mockHttpClient,
         MetricSettings settings,
+        IDateTimeService dateTimeService,
         Meter meter,
         CancellationToken cancellationToken)
     {
         // Arrange
+        dateTimeService.Now.Returns(DateTimeOffset.Now);
         mockHttpClient.When("*").Respond((_) => new HttpResponseMessage(HttpStatusCode.BadRequest) { ReasonPhrase = "" });
         var httpClient = mockHttpClient.ToHttpClient();
-        var sut = new HttpMonitor(monitorDefinition, httpClient, settings, meter);
+        var sut = new HttpMonitor(monitorDefinition, httpClient, dateTimeService, settings, meter);
 
         // Act
         var result = await sut.ExecuteAsync(cancellationToken);
 
         // Assert
         result.IsSuccess.Should().Be(false);
-        result.ErrorMessage.Should().Be("Unknown error occurred - reason provided by the server was null");
+        result.Errors.Select(error => error.Message).Should().Contain("Unknown error occurred - reason provided by the server was null");
     }
 }
