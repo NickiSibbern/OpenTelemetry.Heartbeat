@@ -1,6 +1,3 @@
-using OpenTelemetry.Heartbeat.Monitor.Monitors;
-using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions;
-
 namespace OpenTelemetry.Heartbeat.Monitor;
 
 public class Worker : BackgroundService
