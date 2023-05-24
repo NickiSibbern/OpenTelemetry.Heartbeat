@@ -42,6 +42,7 @@ public class MonitorDefinitionRepository : IMonitorDefinitionRepository
 
             if (monitorDefinition is not null)
             {
+                monitorDefinition.FilePath = file.FullName;
                 monitorDefinitions.Add((file.CreationTime, monitorDefinition));
             }
             

@@ -1,7 +1,9 @@
 using System.IO.Abstractions;
 using OpenTelemetry.Heartbeat.Monitor;
 using OpenTelemetry.Heartbeat.Monitor.Abstractions;
+using OpenTelemetry.Heartbeat.Monitor.Monitors;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions;
+using OpenTelemetry.Heartbeat.Monitor.Monitors.Models;
 using OpenTelemetry.Heartbeat.Monitor.Settings;
 
 IHost host = Host.CreateDefaultBuilder(args)
@@ -9,12 +11,18 @@ IHost host = Host.CreateDefaultBuilder(args)
     {
         services.AddOptions<SearchSettings>().Bind(context.Configuration.GetSection(nameof(SearchSettings)));
         services.AddOptions<MetricSettings>().Bind(context.Configuration.GetSection(nameof(MetricSettings)));
+        services.AddSingleton<Telemetry>();
+        services.AddSingleton<IMonitorRepository, MonitorRepository>();
         
-        services.AddScoped<IFileSystem, FileSystem>();
-        services.AddScoped<IDateTimeService, DateTimeService>();
-        services.AddScoped<IMonitorDefinitionSerializer, MonitorDefinitionSerializer>();
-        services.AddScoped<IMonitorDefinitionRepository, MonitorDefinitionRepository>();
-
+        services.AddHttpClient(nameof(HttpMonitor));
+        
+        services.AddSingleton<IFileSystem, FileSystem>();
+        services.AddSingleton<IDateTimeService, DateTimeService>();
+        services.AddSingleton<IMonitorDefinitionSerializer, MonitorDefinitionSerializer>();
+        services.AddSingleton<IMonitorDefinitionRepository, MonitorDefinitionRepository>();
+        services.AddSingleton<IMonitorFactory, HttpMonitorFactory>();
+        services.AddSingleton<IHeartbeatMonitor, HeartbeatMonitor>();
+        
         services.AddHostedService<Worker>();
     })
     .Build();

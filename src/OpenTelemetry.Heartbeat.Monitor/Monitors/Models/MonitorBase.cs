@@ -43,9 +43,8 @@ public abstract class MonitorBase : IMonitor
     /// Executes the monitor and returns a result
     /// </summary>
     /// <param name="monitor"></param>
-    /// <param name="cancellationToken"></param>
     /// <typeparam name="T"></typeparam>
-    protected async Task<Result<T>> ExecuteMonitorAsync<T>(Func<Task<Result<T>>> monitor, CancellationToken? cancellationToken = default)
+    protected async Task<Result<T>> ExecuteMonitorAsync<T>(Func<Task<Result<T>>> monitor)
     {
         if (_dateTime.Now < LastRun.AddMilliseconds(_monitorDefinition.Interval))
         {
@@ -59,7 +58,7 @@ public abstract class MonitorBase : IMonitor
         catch (Exception e)
         {
             UpMetric = 0;
-            return Result.Fail(new Error(e.Message).CausedBy(e));
+            return Result.Fail($"Monitor for: {_monitorDefinition.Name}").WithError(new Error(e.Message).CausedBy(e));
         }
         finally
         {

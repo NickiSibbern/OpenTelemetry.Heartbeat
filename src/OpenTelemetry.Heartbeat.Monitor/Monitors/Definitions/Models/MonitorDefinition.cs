@@ -2,17 +2,20 @@ using System.Text.Json.Serialization;
 
 namespace OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Models;
 
-public record MonitorDefinition
+public class MonitorDefinition
 {
-    public required string Name { get; init; }
+    [JsonIgnore]
+    public string? FilePath { get; set; }
+    
+    public required string Name { get; set; }
 
-    public required string Namespace { get; init; }
+    public required string Namespace { get; set; }
     
     [JsonPropertyName("type")]
-    public required MonitorDefinitionType MonitorType { get; init; }
+    public required MonitorDefinitionType MonitorType { get; set; }
     
-    public required int Interval { get; init; }
+    public required int Interval { get; set; }
     
     [JsonPropertyName("http")]
-    public HttpMonitorDefinition? Http { get; init; }
+    public HttpMonitorDefinition? Http { get; set; }
 }

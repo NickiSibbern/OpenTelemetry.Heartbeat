@@ -53,9 +53,40 @@ public class MonitorDefinitionSerializerTests
         CancellationToken cancellationToken)
     {
         // Arrange
-        const string json = @"{
-            ""Name"": ""Test Monitor,      
-        }";
+        const string json = @"{""Name"": ""Test Monitor,}";
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+
+        // Act
+        var result = await sut.DeserializeAsync(stream, cancellationToken);
+
+        // Assert
+        result.Should().BeNull();
+    }
+    
+    [Theory]
+    [InlineAutoNSubstituteData(@"{
+            ""name"": ""Test Monitor"",
+            ""namespace"": ""namespace"",
+            ""interval"": 300,
+            ""type"": ""Unknown"",
+            ""http"": {
+                ""timeOut"": 100,
+                ""url"": ""https://localhost"",
+                ""responseCode"": 200
+            }
+        }")]
+    [InlineAutoNSubstituteData(@"{
+            ""name"": ""Test Monitor"",
+            ""namespace"": ""namespace"",
+            ""interval"": ""300"",
+            ""type"": ""Http"",       
+        }")]
+    public async Task Deserialize_Should_Return_Null_If_Json_Cannot_Be_Deserialized(
+        string json,
+        MonitorDefinitionSerializer sut,
+        CancellationToken cancellationToken)
+    {
+        // Arrange
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
 
         // Act

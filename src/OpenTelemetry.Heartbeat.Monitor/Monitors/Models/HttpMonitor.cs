@@ -10,7 +10,6 @@ public sealed class HttpMonitor : MonitorBase
 {
     private readonly MonitorDefinition _monitorDefinition;
     private readonly HttpClient _httpClient;
-    private readonly IDateTimeService _dateTime;
 
     public HttpMonitor(MonitorDefinition monitorDefinition, HttpClient httpClient, IDateTimeService dateTime, MetricSettings settings, Meter meter)
         : base(monitorDefinition, dateTime, settings, meter)
@@ -19,14 +18,13 @@ public sealed class HttpMonitor : MonitorBase
 
         _monitorDefinition = monitorDefinition;
         _httpClient = httpClient;
-        _dateTime = dateTime;
     }
 
     public override async Task<Result<string>> ExecuteAsync(CancellationToken? cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(cancellationToken);
 
-        return await base.ExecuteMonitorAsync<string>(async () =>
+        return await base.ExecuteMonitorAsync(async () =>
         {
             var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken.Value);
             linkedTokenSource.CancelAfter(_monitorDefinition.Http!.TimeOut);
@@ -37,14 +35,15 @@ public sealed class HttpMonitor : MonitorBase
             {
                 base.UpMetric = 1;
                 {
-                    return Result.Ok($"HttpMonitor for: {_monitorDefinition.Name} executed successfully");
+                    return Result.Ok($"Monitor for: {_monitorDefinition.Name} completed successfully");
                 }
             }
 
             base.UpMetric = 0;
-            return Result.Fail(new Error(string.IsNullOrWhiteSpace(response.ReasonPhrase)
-                ? "Unknown error occurred - reason provided by the server was null"
-                : response.ReasonPhrase));
+            return Result.Fail($"Monitor for: {_monitorDefinition.Name} failed with errors").WithError(
+                new Error(string.IsNullOrWhiteSpace(response.ReasonPhrase)
+                    ? "Unknown error occurred - reason provided by the server was null"
+                    : response.ReasonPhrase));
         });
     }
 }

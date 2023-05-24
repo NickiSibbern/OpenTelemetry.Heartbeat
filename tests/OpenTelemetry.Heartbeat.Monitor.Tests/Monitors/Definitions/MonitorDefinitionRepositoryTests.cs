@@ -47,7 +47,7 @@ public class MonitorDefinitionRepositoryTests
 
         // Assert
         result.Count.Should().BeGreaterThan(1);
-        result.Should().Contain(x => x.Name == "service" && x.Interval == 15 && x.Http.TimeOut == 2);
+        result.Should().Contain(x => x.Name == "service" && x.Interval == 15 && x.Http!.TimeOut == 2);
         result.Should().Contain(x => x.Name == "another-service");
     }
     

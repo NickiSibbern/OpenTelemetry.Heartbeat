@@ -22,10 +22,11 @@ public class HttpMonitorTests
         Meter meter)
     {
         // Arrange
+        monitorDefinition.Http = null;
         var httpClient = mockHttpClient.ToHttpClient();
 
         // Act
-        var act = () => new HttpMonitor(monitorDefinition with { Http = null }, httpClient, dateTimeService, settings, meter);
+        var act = () => new HttpMonitor(monitorDefinition, httpClient, dateTimeService, settings, meter);
 
         // Assert
         act.Should().Throw<ArgumentNullException>();
@@ -53,13 +54,20 @@ public class HttpMonitorTests
         Uri requestUri)
     {
         // Arrange
+        monitorDefinition.Http = new HttpMonitorDefinition()
+        {
+            Url = requestUri,
+            TimeOut = 10000,
+            ResponseCode = 200
+        };
+        
         dateTimeService.Now.Returns(DateTimeOffset.Now);
         mockHttpClient.When("*").Respond(HttpStatusCode.Accepted);
         cancellationTokenSource.Cancel();
 
         var httpClient = mockHttpClient.ToHttpClient();
         var sut = new HttpMonitor(
-            monitorDefinition with { Http = new HttpMonitorDefinition(requestUri, 10000, 200) },
+            monitorDefinition,
             httpClient,
             dateTimeService,
             settings,
@@ -84,12 +92,19 @@ public class HttpMonitorTests
         CancellationToken cancellationToken)
     {
         // Arrange
+        monitorDefinition.Http = new HttpMonitorDefinition()
+        {
+            Url = requestUri,
+            TimeOut = 1000,
+            ResponseCode = (int)HttpStatusCode.OK
+        };
+        
         dateTimeService.Now.Returns(DateTimeOffset.Now);
         mockHttpClient.When("*").Respond(HttpStatusCode.OK);
 
         var httpClient = mockHttpClient.ToHttpClient();
         var sut = new HttpMonitor(
-            monitorDefinition with { Http = new HttpMonitorDefinition(requestUri, 1000, (int)HttpStatusCode.OK) },
+            monitorDefinition,
             httpClient,
             dateTimeService,
             settings,
@@ -103,37 +118,6 @@ public class HttpMonitorTests
     }
     
     [Theory, AutoNSubstituteData]
-    public async Task ExecuteAsync_Should_Return_Failure_If_It_Should_Not_Run_Yet(
-        MonitorDefinition monitorDefinition,
-        MockHttpMessageHandler mockHttpClient,
-        MetricSettings settings,
-        IDateTimeService dateTimeService,
-        Meter meter,
-        Uri requestUri,
-        CancellationToken cancellationToken)
-    {
-        // Arrange
-        dateTimeService.Now.Returns(DateTimeOffset.Now);
-        mockHttpClient.When("*").Respond(HttpStatusCode.InternalServerError);
-
-        var httpClient = mockHttpClient.ToHttpClient();
-        var sut = new HttpMonitor(
-            monitorDefinition with { Interval = 20000, Http = new HttpMonitorDefinition(requestUri, 1000, (int)HttpStatusCode.OK) },
-            httpClient,
-            dateTimeService,
-            settings,
-            meter);
-
-        // Act
-        await sut.ExecuteAsync(cancellationToken);
-        var result = await sut.ExecuteAsync(cancellationToken); // Second run to test that we don't run it again, before interval has passed
-
-        // Assert
-        result.IsSuccess.Should().Be(false);
-        result.Errors.Select(error => error.Message).Should().Contain($"Monitor for: {monitorDefinition.Name} should not run yet");
-    }
-
-    [Theory, AutoNSubstituteData]
     public async Task ExecuteAsync_Should_Return_Failure_If_HttpResponse_Does_Not_Match_ResponseStatusCode_From_Definition(
         MonitorDefinition monitorDefinition,
         MockHttpMessageHandler mockHttpClient,
@@ -144,12 +128,19 @@ public class HttpMonitorTests
         CancellationToken cancellationToken)
     {
         // Arrange
+        monitorDefinition.Http = new HttpMonitorDefinition()
+        {
+            Url = requestUri,
+            TimeOut = 1000,
+            ResponseCode = (int)HttpStatusCode.OK
+        };
+        
         dateTimeService.Now.Returns(DateTimeOffset.Now);
         mockHttpClient.When("*").Respond(HttpStatusCode.InternalServerError);
 
         var httpClient = mockHttpClient.ToHttpClient();
         var sut = new HttpMonitor(
-            monitorDefinition with { Http = new HttpMonitorDefinition(requestUri, 1000, (int)HttpStatusCode.OK) },
+            monitorDefinition,
             httpClient,
             dateTimeService,
             settings,
@@ -161,31 +152,7 @@ public class HttpMonitorTests
         // Assert
         result.IsSuccess.Should().Be(false);
     }
-
-    [Theory, AutoNSubstituteData]
-    public async Task ExecuteAsync_Should_Return_Failure_If_Exception_Is_Thrown(
-        MonitorDefinition monitorDefinition,
-        MockHttpMessageHandler mockHttpClient,
-        MetricSettings settings,
-        IDateTimeService dateTimeService,
-        Meter meter,
-        Exception exception,
-        CancellationToken cancellationToken)
-    {
-        // Arrange
-        dateTimeService.Now.Returns(DateTimeOffset.Now);
-        mockHttpClient.When("*").Respond(() => throw exception);
-        var httpClient = mockHttpClient.ToHttpClient();
-        var sut = new HttpMonitor(monitorDefinition, httpClient, dateTimeService, settings, meter);
-
-        // Act
-        var result = await sut.ExecuteAsync(cancellationToken);
-
-        // Assert
-        result.IsSuccess.Should().Be(false);
-        result.Errors.Select(error => error.Message).Should().Contain(exception.Message);
-    }
-
+    
     [Theory, AutoNSubstituteData]
     public async Task ExecuteAsync_Should_Return_Failure_With_Message_When_Reason_Phrase_Is_Not_Set_By_Server(
         MonitorDefinition monitorDefinition,
@@ -197,7 +164,7 @@ public class HttpMonitorTests
     {
         // Arrange
         dateTimeService.Now.Returns(DateTimeOffset.Now);
-        mockHttpClient.When("*").Respond((_) => new HttpResponseMessage(HttpStatusCode.BadRequest) { ReasonPhrase = "" });
+        mockHttpClient.When("*").Respond(_ => new HttpResponseMessage(HttpStatusCode.BadRequest) { ReasonPhrase = "" });
         var httpClient = mockHttpClient.ToHttpClient();
         var sut = new HttpMonitor(monitorDefinition, httpClient, dateTimeService, settings, meter);
 

@@ -1,23 +1,30 @@
-using Microsoft.Extensions.Options;
-using OpenTelemetry.Heartbeat.Monitor.Settings;
+using OpenTelemetry.Heartbeat.Monitor.Monitors;
+using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions;
 
 namespace OpenTelemetry.Heartbeat.Monitor;
 
 public class Worker : BackgroundService
 {
+    private readonly IHeartbeatMonitor _heartbeatMonitor;
     private readonly ILogger<Worker> _logger;
 
-    public Worker(ILogger<Worker> logger, IOptions<SearchSettings> options)
+    public Worker(
+        IHeartbeatMonitor heartbeatMonitor,
+        ILogger<Worker> logger)
     {
+        _heartbeatMonitor = heartbeatMonitor;
         _logger = logger;
-        _ = options.Value;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        await _heartbeatMonitor.SetupInitialMonitors(stoppingToken);
+        
         while (!stoppingToken.IsCancellationRequested)
         {
             _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+            await _heartbeatMonitor.StartAsync(stoppingToken);
+            
             await Task.Delay(1000, stoppingToken);
         }
     }
