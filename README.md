@@ -10,7 +10,7 @@ A simple worker that Converts files into probes that is exposed as a metric. The
   "interval": 1000, // in milliseconds
   "type": "http",
   "http": {
-    "timeOut": 100, // in milliseconds
+    "timeOut": 1000, // in milliseconds
     "url": "https://localhost",
     "responseCode": 200
   }
