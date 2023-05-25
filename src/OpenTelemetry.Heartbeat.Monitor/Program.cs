@@ -6,11 +6,13 @@ using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Models;
 using OpenTelemetry.Heartbeat.Monitor.Settings;
 
+
 IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
     {
-        services.AddOptions<SearchSettings>().Bind(context.Configuration.GetSection(nameof(SearchSettings)));
-        services.AddOptions<MetricSettings>().Bind(context.Configuration.GetSection(nameof(MetricSettings)));
+        services.AddOptions<SearchSettings>().Bind(context.Configuration.GetSection(nameof(SearchSettings))).ValidateDataAnnotations().ValidateOnStart();
+        services.AddOptions<MetricSettings>().Bind(context.Configuration.GetSection(nameof(MetricSettings))).ValidateDataAnnotations().ValidateOnStart();
+        services.AddOptions<HeartbeatSettings>().Bind(context.Configuration.GetSection(nameof(HeartbeatSettings))).ValidateDataAnnotations().ValidateOnStart();
         services.AddSingleton<Telemetry>();
         services.AddSingleton<IMonitorRepository, MonitorRepository>();
         

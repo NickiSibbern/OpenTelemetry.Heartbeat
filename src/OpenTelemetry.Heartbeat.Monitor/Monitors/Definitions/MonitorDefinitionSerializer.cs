@@ -36,7 +36,7 @@ public sealed class MonitorDefinitionSerializer : IMonitorDefinitionSerializer
         }
         catch (Exception e)
         {
-            _logger.LogInformation("Unable to deserialize monitor definition: {Exception}", e);
+            _logger.LogError("Unable to deserialize monitor definition: {Exception}", e);
             return null;
         }
     }

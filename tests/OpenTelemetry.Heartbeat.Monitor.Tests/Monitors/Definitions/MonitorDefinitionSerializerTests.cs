@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Models;
+using OpenTelemetry.Heartbeat.Monitor.Tests.TestHelpers;
 
 namespace OpenTelemetry.Heartbeat.Monitor.Tests.Monitors.Definitions;
 
@@ -98,7 +99,7 @@ public class MonitorDefinitionSerializerTests
 
     [Theory, AutoNSubstituteData]
     public async Task DeserializeAsync_Should_Return_Null_When_Json_Is_Null(
-        [Frozen] ILogger<MonitorDefinitionSerializer> logger,
+        [Frozen]ILogger<MonitorDefinitionSerializer> logger,
         MonitorDefinitionSerializer sut)
     {
         // Arrange && Act
@@ -106,6 +107,6 @@ public class MonitorDefinitionSerializerTests
 
         // Assert
         result.Should().BeNull();
-        logger.ReceivedWithAnyArgs(1).LogInformation("Unable to deserialize monitor definition: {Exception}", Arg.Any<Exception>());
+        logger.ReceivedWithAnyArgs(1).LogError(default, Arg.Any<Exception>());
     }
 }

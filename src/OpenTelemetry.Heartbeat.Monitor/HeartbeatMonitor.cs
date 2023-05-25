@@ -72,7 +72,6 @@ public class HeartbeatMonitor : IHeartbeatMonitor
                 {
                     _logger.LogWarning("{MonitorMessage}", result.Reasons);
                 }
-                return monitor.ExecuteAsync(cancellationToken);
             }));
         }
     }
