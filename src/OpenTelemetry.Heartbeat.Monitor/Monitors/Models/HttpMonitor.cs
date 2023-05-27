@@ -11,7 +11,12 @@ public sealed class HttpMonitor : MonitorBase
     private readonly MonitorDefinition _monitorDefinition;
     private readonly HttpClient _httpClient;
 
-    public HttpMonitor(MonitorDefinition monitorDefinition, HttpClient httpClient, IDateTimeService dateTime, MetricSettings settings, Meter meter)
+    public HttpMonitor(
+        MonitorDefinition monitorDefinition,
+        HttpClient httpClient,
+        IDateTimeService dateTime,
+        HeartbeatSettings settings,
+        Meter meter)
         : base(monitorDefinition, dateTime, settings, meter)
     {
         ArgumentNullException.ThrowIfNull(monitorDefinition.Http);
@@ -20,13 +25,13 @@ public sealed class HttpMonitor : MonitorBase
         _httpClient = httpClient;
     }
 
-    public override async Task<Result<string>> ExecuteAsync(CancellationToken? cancellationToken = default)
+    public override async Task<Result> ExecuteAsync(CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(cancellationToken);
 
         return await base.ExecuteMonitorAsync(async () =>
         {
-            var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken.Value);
+            var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             linkedTokenSource.CancelAfter(_monitorDefinition.Http!.TimeOut);
 
             var response = await _httpClient.GetAsync(_monitorDefinition.Http!.Url, linkedTokenSource.Token);
@@ -34,14 +39,12 @@ public sealed class HttpMonitor : MonitorBase
             if ((int)response.StatusCode == _monitorDefinition.Http.ResponseCode)
             {
                 base.UpMetric = 1;
-                {
-                    return Result.Ok($"Monitor for: {_monitorDefinition.Name} completed successfully");
-                }
+                return Result.Ok().WithSuccess("Monitor executed successfully");
             }
 
             base.UpMetric = 0;
-            return Result.Fail($"Monitor for: {_monitorDefinition.Name} failed with errors").WithError(
-                new Error(string.IsNullOrWhiteSpace(response.ReasonPhrase)
+            return Result.Fail($"Monitor for: {_monitorDefinition.Name} failed with errors")
+                .WithError(new Error(string.IsNullOrWhiteSpace(response.ReasonPhrase)
                     ? "Unknown error occurred - reason provided by the server was null"
                     : response.ReasonPhrase));
         });

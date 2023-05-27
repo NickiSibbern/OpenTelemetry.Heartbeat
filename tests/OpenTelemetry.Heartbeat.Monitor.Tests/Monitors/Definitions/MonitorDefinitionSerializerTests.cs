@@ -6,10 +6,11 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Models;
-using OpenTelemetry.Heartbeat.Monitor.Tests.TestHelpers;
+using Xunit.Categories;
 
 namespace OpenTelemetry.Heartbeat.Monitor.Tests.Monitors.Definitions;
 
+[UnitTest]
 public class MonitorDefinitionSerializerTests
 {
     [Theory, AutoNSubstituteData]

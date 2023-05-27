@@ -66,7 +66,7 @@ public class HeartbeatMonitor : IHeartbeatMonitor
                 var result = await monitor.ExecuteAsync(cancellationToken);
                 if (result.IsSuccess)
                 {
-                    _logger.LogInformation("{MonitorMessage}", result.Value);
+                    _logger.LogDebug("{MonitorMessage}", result.Successes);
                 }
                 else
                 {

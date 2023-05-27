@@ -11,4 +11,19 @@ public class HeartbeatSettings
     /// The amount of monitors to be run in parallel in each job
     /// </summary>
     public required int JobBatchSize { get; set; }
+
+    /// <summary>
+    /// Name of the metric to expose
+    /// </summary>
+    public required string MetricName { get; set; }
+
+    /// <summary>
+    /// Description of the metric to expose
+    /// </summary>
+    public required string MetricDescription { get; set; }
+    
+    /// <summary>
+    /// The endpoint to send the metric to
+    /// </summary>
+    public required string MetricExporterEndpoint { get; set; }
 }

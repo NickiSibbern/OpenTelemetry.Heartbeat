@@ -8,16 +8,18 @@ using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Models;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Models;
 using OpenTelemetry.Heartbeat.Monitor.Settings;
 using RichardSzalay.MockHttp;
+using Xunit.Categories;
 
 namespace OpenTelemetry.Heartbeat.Monitor.Tests.Monitors.Models;
 
+[UnitTest]
 public class HttpMonitorTests
 {
     [Theory, AutoNSubstituteData]
     public void Creation_Should_Throw_If_Http_Object_Is_Null(
         MonitorDefinition monitorDefinition,
         MockHttpMessageHandler mockHttpClient,
-        MetricSettings settings,
+        HeartbeatSettings settings,
         IDateTimeService dateTimeService,
         Meter meter)
     {
@@ -34,10 +36,11 @@ public class HttpMonitorTests
 
     [Theory, AutoNSubstituteData]
     public void ExecuteAsync_Should_Throw_If_CancellationToken_Is_Null(
-        HttpMonitor sut)
+        HttpMonitor sut,
+        CancellationToken cancellationToken)
     {
         // Arrange && Act
-        var act = async () => await sut.ExecuteAsync();
+        var act = async () => await sut.ExecuteAsync(cancellationToken);
 
         // Assert
         act.Should().ThrowAsync<ArgumentNullException>();
@@ -47,7 +50,7 @@ public class HttpMonitorTests
     public async Task ExecuteAsync_Should_Cancel_If_Root_Cancellation_Token_Cancels(
         MonitorDefinition monitorDefinition,
         MockHttpMessageHandler mockHttpClient,
-        MetricSettings settings,
+        HeartbeatSettings settings,
         IDateTimeService dateTimeService,
         Meter meter,
         CancellationTokenSource cancellationTokenSource,
@@ -85,7 +88,7 @@ public class HttpMonitorTests
     public async Task ExecuteAsync_Should_Return_Success_If_HttpResponse_Matched_ResponseStatusCode_From_Definition(
         MonitorDefinition monitorDefinition,
         MockHttpMessageHandler mockHttpClient,
-        MetricSettings settings,
+        HeartbeatSettings settings,
         IDateTimeService dateTimeService,
         Meter meter,
         Uri requestUri,
@@ -121,7 +124,7 @@ public class HttpMonitorTests
     public async Task ExecuteAsync_Should_Return_Failure_If_HttpResponse_Does_Not_Match_ResponseStatusCode_From_Definition(
         MonitorDefinition monitorDefinition,
         MockHttpMessageHandler mockHttpClient,
-        MetricSettings settings,
+        HeartbeatSettings settings,
         IDateTimeService dateTimeService,
         Meter meter,
         Uri requestUri,
@@ -157,7 +160,7 @@ public class HttpMonitorTests
     public async Task ExecuteAsync_Should_Return_Failure_With_Message_When_Reason_Phrase_Is_Not_Set_By_Server(
         MonitorDefinition monitorDefinition,
         MockHttpMessageHandler mockHttpClient,
-        MetricSettings settings,
+        HeartbeatSettings settings,
         IDateTimeService dateTimeService,
         Meter meter,
         CancellationToken cancellationToken)

@@ -8,9 +8,12 @@ using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Models;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Models;
 using OpenTelemetry.Heartbeat.Monitor.Settings;
+using OpenTelemetry.Heartbeat.Monitor.Telemetry;
+using Xunit.Categories;
 
 namespace OpenTelemetry.Heartbeat.Monitor.Tests.Monitors;
 
+[UnitTest]
 public class HttpMonitorFactoryTests
 {
     [Theory, AutoNSubstituteData]
@@ -62,15 +65,15 @@ public class HttpMonitorFactoryTests
     public void Create_Should_Return_HttpMonitor_With_Named_HttpClient(
         IHttpClientFactory httpClientFactory,
         IDateTimeService dateTimeService,
-        Telemetry telemetry,
+        TelemetrySource telemetrySource,
         MonitorDefinition monitorDefinition,
-        MetricSettings metricSettings)
+        HeartbeatSettings settings)
     {
         // Arrange
-        var metricSettingsOptions = Options.Create(metricSettings);
+        var metricSettingsOptions = Options.Create(settings);
         monitorDefinition.MonitorType = MonitorDefinitionType.Http;
 
-        var sut = new HttpMonitorFactory(dateTimeService, httpClientFactory, telemetry, metricSettingsOptions);
+        var sut = new HttpMonitorFactory(dateTimeService, httpClientFactory, telemetrySource, metricSettingsOptions);
         // Act
         var result = sut.Create(monitorDefinition);
 

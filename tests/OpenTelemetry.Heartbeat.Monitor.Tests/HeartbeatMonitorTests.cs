@@ -8,9 +8,11 @@ using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Models;
 using OpenTelemetry.Heartbeat.Monitor.Settings;
 using OpenTelemetry.Heartbeat.Monitor.Tests.TestHelpers;
+using Xunit.Categories;
 
 namespace OpenTelemetry.Heartbeat.Monitor.Tests;
 
+[UnitTest]
 public class HeartbeatMonitorTests
 {
     [Theory, AutoNSubstituteData]
@@ -172,7 +174,7 @@ public class HeartbeatMonitorTests
         await sut.StartAsync(cancellationTokenSource.Token);
 
         // Assert
-        logger.DidNotReceiveWithAnyArgs().LogInformation(default);
+        logger.DidNotReceiveWithAnyArgs().LogDebug(default);
         logger.DidNotReceiveWithAnyArgs().LogWarning(default);
     }
     
@@ -187,7 +189,7 @@ public class HeartbeatMonitorTests
         CancellationToken cancellationToken)
     {
         // Arrange
-        var result = Result.Ok("test");
+        var result = Result.Ok().WithSuccess("test");
         monitor.ExecuteAsync(cancellationToken).Returns(result);
         var list = new List<IMonitor> { monitor };
         monitorRepository.Monitors.Returns(list);
@@ -203,7 +205,7 @@ public class HeartbeatMonitorTests
         await sut.StartAsync(cancellationToken);
 
         // Assert
-        logger.Received().LogInformation("{MonitorMessage}", result.Value);
+        logger.Received().LogDebug("{MonitorMessage}", result.Successes);
     }
     
     [Theory, AutoNSubstituteData]

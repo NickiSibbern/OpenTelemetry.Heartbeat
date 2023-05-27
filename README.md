@@ -20,6 +20,8 @@ the metric will follow the [Otel standard](https://github.com/open-telemetry/ope
 - service.name (name from the json)
 - service.namespace (namespace from the json)
 
+when configuring make sure that the `interval` defined in appsettings.heartbeatsettings is greater than the `timeout` specified in the heartbeat.json files, otherwise the worker will not be able to keep up with the probes.
+
 ## Why
 [OpenTelemetry HttpStatucCheck reciever](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/httpcheckreceiver/documentation.md) required that all urls be known at the deployment time of the collector.   
 This worker is intended to be used where you do not know the urls beforehand and you do not have any service discovery mechanism in place.

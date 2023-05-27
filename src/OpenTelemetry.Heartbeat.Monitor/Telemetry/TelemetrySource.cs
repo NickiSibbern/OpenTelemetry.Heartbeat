@@ -2,11 +2,11 @@ using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Reflection;
 
-namespace OpenTelemetry.Heartbeat.Monitor;
+namespace OpenTelemetry.Heartbeat.Monitor.Telemetry;
 
-public class Telemetry
+public class TelemetrySource
 {
-    public Telemetry()
+    public TelemetrySource()
     {
         var name = Assembly.GetExecutingAssembly().GetName().Name ?? "HeartbeatMonitor";
         ActivitySource = new ActivitySource(name);

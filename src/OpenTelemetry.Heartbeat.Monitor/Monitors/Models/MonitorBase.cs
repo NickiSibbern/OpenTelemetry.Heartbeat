@@ -10,21 +10,20 @@ public abstract class MonitorBase : IMonitor
 {
     private readonly MonitorDefinition _monitorDefinition;
     private readonly IDateTimeService _dateTime;
-    
-    protected MonitorBase(MonitorDefinition monitorDefinition, IDateTimeService dateTime, MetricSettings settings, Meter meter)
+
+    protected MonitorBase(MonitorDefinition monitorDefinition, IDateTimeService dateTime, HeartbeatSettings settings, Meter meter)
     {
         _monitorDefinition = monitorDefinition;
         _dateTime = dateTime;
-        
+
         meter.CreateObservableGauge(
-            settings.Name,
+            settings.MetricName,
             () => new Measurement<int>(UpMetric,
                 new List<KeyValuePair<string, object?>>
                 {
-                    new(OpenTelemetryConventions.ServiceName, monitorDefinition.Name),
-                    new(OpenTelemetryConventions.Namespace, monitorDefinition.Namespace)
+                    new(OpenTelemetryConventions.ServiceName, monitorDefinition.Name), new(OpenTelemetryConventions.Namespace, monitorDefinition.Namespace)
                 }),
-            description: settings.Description);
+            description: settings.MetricDescription);
     }
 
     /// <summary>
@@ -36,21 +35,22 @@ public abstract class MonitorBase : IMonitor
     /// Time of the last executed run
     /// </summary>
     protected DateTimeOffset LastRun { get; set; } = DateTimeOffset.MinValue;
-    
-    public abstract Task<Result<string>> ExecuteAsync(CancellationToken? cancellationToken = default);
+
+    public abstract Task<Result> ExecuteAsync(CancellationToken cancellationToken);
 
     /// <summary>
     /// Executes the monitor and returns a result
     /// </summary>
     /// <param name="monitor"></param>
+    /// <param name="logger"></param>
     /// <typeparam name="T"></typeparam>
-    protected async Task<Result<T>> ExecuteMonitorAsync<T>(Func<Task<Result<T>>> monitor)
+    protected async Task<Result> ExecuteMonitorAsync(Func<Task<Result>> monitor)
     {
         if (_dateTime.Now < LastRun.AddMilliseconds(_monitorDefinition.Interval))
         {
-            return Result.Fail($"Monitor for: {_monitorDefinition.Name} should not run yet");
+            return Result.Ok().WithReason(new Success($"Monitor for: {_monitorDefinition.Name} should not run yet"));
         }
-        
+
         try
         {
             return await monitor();
@@ -58,7 +58,7 @@ public abstract class MonitorBase : IMonitor
         catch (Exception e)
         {
             UpMetric = 0;
-            return Result.Fail($"Monitor for: {_monitorDefinition.Name}").WithError(new Error(e.Message).CausedBy(e));
+            return Result.Fail($"Monitor for: {_monitorDefinition.Name} failed with errors").WithError(new Error(e.Message));
         }
         finally
         {

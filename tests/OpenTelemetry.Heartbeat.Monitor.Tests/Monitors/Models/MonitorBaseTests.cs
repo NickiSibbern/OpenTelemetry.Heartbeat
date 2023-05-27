@@ -7,15 +7,17 @@ using OpenTelemetry.Heartbeat.Monitor.Abstractions;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Models;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Models;
 using OpenTelemetry.Heartbeat.Monitor.Settings;
+using Xunit.Categories;
 
 namespace OpenTelemetry.Heartbeat.Monitor.Tests.Monitors.Models;
 
+[UnitTest]
 public class MonitorBaseTests
 {
     [Theory, AutoNSubstituteData]
     public async Task ExecuteAsync_Should_Return_Failure_If_Exception_Is_Thrown(
         MonitorDefinition monitorDefinition,
-        MetricSettings settings,
+        HeartbeatSettings settings,
         IDateTimeService dateTimeService,
         Meter meter,
         Exception exception,
@@ -36,9 +38,9 @@ public class MonitorBaseTests
     }
     
     [Theory, AutoNSubstituteData]
-    public async Task ExecuteAsync_Should_Return_Failure_If_It_Should_Not_Run_Yet(
+    public async Task ExecuteAsync_Should_Return_Ok_If_It_Should_Not_Run_Yet(
         MonitorDefinition monitorDefinition,
-        MetricSettings settings,
+        HeartbeatSettings settings,
         IDateTimeService dateTimeService,
         Meter meter,
         CancellationToken cancellationToken)
@@ -60,8 +62,8 @@ public class MonitorBaseTests
         var result = await sut.ExecuteAsync(cancellationToken);
 
         // Assert
-        result.IsSuccess.Should().Be(false);
-        result.Errors.Select(error => error.Message).Should().Contain($"Monitor for: {monitorDefinition.Name} should not run yet");
+        result.IsSuccess.Should().Be(true);
+        result.Successes.Select(s => s.Message).Should().Contain($"Monitor for: {monitorDefinition.Name} should not run yet");
     }
 
     private class MonitorBaseTestClass : MonitorBase
@@ -71,7 +73,7 @@ public class MonitorBaseTests
         public MonitorBaseTestClass(
             MonitorDefinition monitorDefinition,
             IDateTimeService dateTime,
-            MetricSettings settings,
+            HeartbeatSettings settings,
             Meter meter,
             Action action)
             : base(monitorDefinition, dateTime, settings, meter)
@@ -86,12 +88,12 @@ public class MonitorBaseTests
 
         public int GetUpMetric => base.UpMetric;
         
-        public override async Task<Result<string>> ExecuteAsync(CancellationToken? cancellationToken = default)
+        public override async Task<Result> ExecuteAsync(CancellationToken cancellationToken)
         {
             return await base.ExecuteMonitorAsync(() =>
             {
                 _action();
-                return Task.FromResult(Result.Ok("Test"));
+                return Task.FromResult(Result.Ok().WithSuccess("Monitor executed"));
             });
         }
     }

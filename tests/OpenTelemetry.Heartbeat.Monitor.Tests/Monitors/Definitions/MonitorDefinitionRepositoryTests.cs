@@ -6,9 +6,11 @@ using NSubstitute;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Models;
 using OpenTelemetry.Heartbeat.Monitor.Settings;
+using Xunit.Categories;
 
 namespace OpenTelemetry.Heartbeat.Monitor.Tests.Monitors.Definitions;
 
+[UnitTest]
 public class MonitorDefinitionRepositoryTests
 {
     [Theory, AutoNSubstituteData]

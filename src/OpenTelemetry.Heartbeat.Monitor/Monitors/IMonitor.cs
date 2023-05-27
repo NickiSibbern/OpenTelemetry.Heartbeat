@@ -9,5 +9,5 @@ public interface IMonitor
     /// </summary>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<Result<string>> ExecuteAsync(CancellationToken? cancellationToken = default);
+    Task<Result> ExecuteAsync(CancellationToken cancellationToken);
 }
