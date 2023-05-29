@@ -6,12 +6,12 @@ namespace OpenTelemetry.Heartbeat.Monitor;
 public class Worker : BackgroundService
 {
     private readonly IHeartbeatMonitor _heartbeatMonitor;
-    private readonly HeartbeatSettings _heartbeatSettings;
+    private readonly HeartbeatConfig _heartbeatConfig;
 
-    public Worker(IHeartbeatMonitor heartbeatMonitor, IOptions<HeartbeatSettings> heartbeatSettings)
+    public Worker(IHeartbeatMonitor heartbeatMonitor, IOptions<HeartbeatConfig> heartbeatConfig)
     {
         _heartbeatMonitor = heartbeatMonitor;
-        _heartbeatSettings = heartbeatSettings.Value;
+        _heartbeatConfig = heartbeatConfig.Value;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -21,8 +21,8 @@ public class Worker : BackgroundService
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                await _heartbeatMonitor.StartAsync(stoppingToken);
-                await Task.Delay(_heartbeatSettings.JobInterval, stoppingToken);
+                await _heartbeatMonitor.ExecuteAsync(stoppingToken);
+                await Task.Delay(_heartbeatConfig.JobInterval, stoppingToken);
             }
         }
         catch (TaskCanceledException)

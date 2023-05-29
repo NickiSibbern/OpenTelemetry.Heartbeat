@@ -30,7 +30,7 @@ public class HttpMonitorFactoryTests
         // Assert
         result.Should().BeTrue();
     }
-    
+
     [Theory, AutoNSubstituteData]
     public void CanHandle_Should_Return_False_When_MonitorType_Is_Not_Http(
         MonitorDefinition monitorDefinition,
@@ -45,7 +45,7 @@ public class HttpMonitorFactoryTests
         // Assert
         result.Should().BeFalse();
     }
-    
+
     [Theory, AutoNSubstituteData]
     public void Create_Should_Throw_InvalidOperationException_When_MonitorType_Is_Not_Http(
         MonitorDefinition monitorDefinition,
@@ -60,20 +60,20 @@ public class HttpMonitorFactoryTests
         // Assert
         act.Should().Throw<InvalidOperationException>();
     }
-    
+
     [Theory, AutoNSubstituteData]
     public void Create_Should_Return_HttpMonitor_With_Named_HttpClient(
         IHttpClientFactory httpClientFactory,
         IDateTimeService dateTimeService,
         TelemetrySource telemetrySource,
         MonitorDefinition monitorDefinition,
-        HeartbeatSettings settings)
+        HeartbeatConfig config)
     {
         // Arrange
-        var metricSettingsOptions = Options.Create(settings);
+        var metricConfigOptions = Options.Create(config);
         monitorDefinition.MonitorType = MonitorDefinitionType.Http;
 
-        var sut = new HttpMonitorFactory(dateTimeService, httpClientFactory, telemetrySource, metricSettingsOptions);
+        var sut = new HttpMonitorFactory(dateTimeService, httpClientFactory, telemetrySource, metricConfigOptions);
         // Act
         var result = sut.Create(monitorDefinition);
 

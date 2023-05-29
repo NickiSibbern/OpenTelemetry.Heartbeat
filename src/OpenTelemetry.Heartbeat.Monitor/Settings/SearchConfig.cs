@@ -1,6 +1,6 @@
 namespace OpenTelemetry.Heartbeat.Monitor.Settings;
 
-public class SearchSettings
+public class SearchConfig
 {
     public required string RootDirectory { get; init; }
     public required string SearchPattern { get; init; }

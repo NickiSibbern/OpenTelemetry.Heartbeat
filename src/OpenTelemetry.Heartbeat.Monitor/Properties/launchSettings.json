@@ -2,6 +2,9 @@
   "profiles": {
     "OpenTelemetry.Heartbeat.Monitor": {
       "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "applicationUrl": "http://localhost:5001",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       },

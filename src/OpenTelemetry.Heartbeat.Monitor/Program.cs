@@ -1,33 +1,63 @@
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http.Json;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using OpenTelemetry.Heartbeat.Monitor;
 using OpenTelemetry.Heartbeat.Monitor.Abstractions;
+using OpenTelemetry.Heartbeat.Monitor.Endpoints;
 using OpenTelemetry.Heartbeat.Monitor.Monitors;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Models;
 using OpenTelemetry.Heartbeat.Monitor.Settings;
 using OpenTelemetry.Heartbeat.Monitor.Telemetry;
 
+var builder = WebApplication.CreateBuilder(args);
 
-IHost host = Host.CreateDefaultBuilder(args)
-    .ConfigureServices((context, services) =>
-    {
-        services.BindOptions<SearchSettings>(context.Configuration, nameof(SearchSettings));
-        var heartbeatSettings = services.BindOptions<HeartbeatSettings>(context.Configuration, nameof(HeartbeatSettings));
+builder.Services.BindOptions<SearchConfig>(builder.Configuration, nameof(SearchConfig));
+var heartbeatConfig = builder.Services.BindOptions<HeartbeatConfig>(builder.Configuration, nameof(HeartbeatConfig));
 
-        services.AddTelemetry(heartbeatSettings);
-        services.AddSingleton<IMonitorRepository, MonitorRepository>();
+builder.Services.AddTelemetry(heartbeatConfig);
+builder.Services.AddSingleton<IMonitorRepository, MonitorRepository>();
 
-        services.AddHttpClient(nameof(HttpMonitor));
+builder.Services.AddHttpClient(nameof(HttpMonitor));
 
-        services.AddSingleton<IFileSystem, FileSystem>();
-        services.AddSingleton<IDateTimeService, DateTimeService>();
-        services.AddSingleton<IMonitorDefinitionSerializer, MonitorDefinitionSerializer>();
-        services.AddSingleton<IMonitorDefinitionRepository, MonitorDefinitionRepository>();
-        services.AddSingleton<IMonitorFactory, HttpMonitorFactory>();
-        services.AddSingleton<IHeartbeatMonitor, HeartbeatMonitor>();
+builder.Services.TryAddSingleton<IFileSystem, FileSystem>();
+builder.Services.TryAddSingleton<IDateTimeService, DateTimeService>();
+builder.Services.TryAddSingleton<IMonitorDefinitionSerializer, MonitorDefinitionSerializer>();
+builder.Services.TryAddSingleton<IMonitorDefinitionRepository, MonitorDefinitionRepository>();
+builder.Services.TryAddSingleton<IMonitorFactory, HttpMonitorFactory>();
+builder.Services.TryAddSingleton<IHeartbeatMonitor, HeartbeatMonitor>();
+builder.Services.AddHostedService<Worker>();
 
-        services.AddHostedService<Worker>();
-    })
-    .Build();
 
-host.Run();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Services.Configure<JsonOptions>(options =>
+{
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
+builder.Services.Configure<Microsoft.AspNetCore.Mvc.JsonOptions>(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+
+app.RegisterMonitorEndpoints();
+
+app.Run();
+
+// used for testing
+[ExcludeFromCodeCoverage]
+public partial class Program { }

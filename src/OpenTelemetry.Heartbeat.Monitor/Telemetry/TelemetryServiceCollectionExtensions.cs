@@ -8,7 +8,7 @@ namespace OpenTelemetry.Heartbeat.Monitor.Telemetry;
 
 public static class TelemetryServiceCollectionExtensions
 {
-    public static IServiceCollection AddTelemetry(this IServiceCollection services, HeartbeatSettings heartbeatSettings)
+    public static IServiceCollection AddTelemetry(this IServiceCollection services, HeartbeatConfig heartbeatConfig)
     {
         services.AddSingleton<TelemetrySource>();
         services.AddOpenTelemetry()
@@ -19,7 +19,7 @@ public static class TelemetryServiceCollectionExtensions
                 .AddOtlpExporter(o =>
                 {
                     o.Protocol = OtlpExportProtocol.HttpProtobuf;
-                    o.Endpoint = new Uri(heartbeatSettings.MetricExporterEndpoint);
+                    o.Endpoint = new Uri(heartbeatConfig.MetricExporterEndpoint);
                 }));
         
         return services;

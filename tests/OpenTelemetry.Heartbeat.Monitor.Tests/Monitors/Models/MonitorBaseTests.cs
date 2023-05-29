@@ -17,7 +17,7 @@ public class MonitorBaseTests
     [Theory, AutoNSubstituteData]
     public async Task ExecuteAsync_Should_Return_Failure_If_Exception_Is_Thrown(
         MonitorDefinition monitorDefinition,
-        HeartbeatSettings settings,
+        HeartbeatConfig config,
         IDateTimeService dateTimeService,
         Meter meter,
         Exception exception,
@@ -26,7 +26,7 @@ public class MonitorBaseTests
         // Arrange
 
         dateTimeService.Now.Returns(DateTimeOffset.Now);
-        var sut = new MonitorBaseTestClass(monitorDefinition, dateTimeService, settings, meter, () => throw exception);
+        var sut = new MonitorBaseTestClass(monitorDefinition, dateTimeService, config, meter, () => throw exception);
 
         // Act
         var result = await sut.ExecuteAsync(cancellationToken);
@@ -40,7 +40,7 @@ public class MonitorBaseTests
     [Theory, AutoNSubstituteData]
     public async Task ExecuteAsync_Should_Return_Ok_If_It_Should_Not_Run_Yet(
         MonitorDefinition monitorDefinition,
-        HeartbeatSettings settings,
+        HeartbeatConfig config,
         IDateTimeService dateTimeService,
         Meter meter,
         CancellationToken cancellationToken)
@@ -53,7 +53,7 @@ public class MonitorBaseTests
         var sut = new MonitorBaseTestClass(
             monitorDefinition,
             dateTimeService,
-            settings,
+            config,
             meter,
             () => { });
 
@@ -62,8 +62,8 @@ public class MonitorBaseTests
         var result = await sut.ExecuteAsync(cancellationToken);
 
         // Assert
-        result.IsSuccess.Should().Be(true);
-        result.Successes.Select(s => s.Message).Should().Contain($"Monitor for: {monitorDefinition.Name} should not run yet");
+        result.IsSuccess.Should().Be(false);
+        result.HasError<WarningResult>();
     }
 
     private class MonitorBaseTestClass : MonitorBase
@@ -73,10 +73,10 @@ public class MonitorBaseTests
         public MonitorBaseTestClass(
             MonitorDefinition monitorDefinition,
             IDateTimeService dateTime,
-            HeartbeatSettings settings,
+            HeartbeatConfig config,
             Meter meter,
             Action action)
-            : base(monitorDefinition, dateTime, settings, meter)
+            : base(monitorDefinition, dateTime, config, meter)
         {
             _action = action;
         }

@@ -5,8 +5,8 @@ namespace OpenTelemetry.Heartbeat.Monitor.Tests;
 
 public class TestWorker : Worker
 {
-    public TestWorker(IHeartbeatMonitor heartbeatMonitor, IOptions<HeartbeatSettings> heartbeatSettings) 
-        : base(heartbeatMonitor, heartbeatSettings)
+    public TestWorker(IHeartbeatMonitor heartbeatMonitor, IOptions<HeartbeatConfig> heartbeatConfig) 
+        : base(heartbeatMonitor, heartbeatConfig)
     {
     }
 

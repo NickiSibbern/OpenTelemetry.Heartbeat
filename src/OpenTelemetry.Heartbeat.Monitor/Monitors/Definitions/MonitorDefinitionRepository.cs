@@ -13,41 +13,38 @@ public interface IMonitorDefinitionRepository
 
 public class MonitorDefinitionRepository : IMonitorDefinitionRepository
 {
-    private readonly SearchSettings _searchSettings;
+    private readonly SearchConfig _searchConfig;
     private readonly IFileSystem _fileSystem;
     private readonly IMonitorDefinitionSerializer _serializer;
 
-    public MonitorDefinitionRepository(IFileSystem fileSystem, IMonitorDefinitionSerializer serializer, IOptions<SearchSettings> searchOptions)
+    public MonitorDefinitionRepository(IFileSystem fileSystem, IMonitorDefinitionSerializer serializer, IOptions<SearchConfig> searchOptions)
     {
         _fileSystem = fileSystem;
         _serializer = serializer;
-        _searchSettings = searchOptions.Value;
+        _searchConfig = searchOptions.Value;
     }
-    
+
     public async Task<IEnumerable<MonitorDefinition>> GetMonitorDefinitions(CancellationToken cancellationToken)
     {
         var monitorDefinitions = new ConcurrentBag<(DateTime creationTime, MonitorDefinition monitorDefinition)>();
 
         var files = _fileSystem.Directory.EnumerateFiles(
-            _searchSettings.RootDirectory,
-            _searchSettings.SearchPattern,
-            _searchSettings.IncludeSubDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
+            _searchConfig.RootDirectory,
+            _searchConfig.SearchPattern,
+            _searchConfig.IncludeSubDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
             .Select(path => _fileSystem.FileInfo.New(path));
-        
+
         await Task.WhenAll(files.Select(async file =>
         {
-            var monitorDefinition = await _serializer
-                .DeserializeAsync(file.OpenRead(), cancellationToken)
-                .ConfigureAwait(false);
+            var monitorDefinition = await _serializer.DeserializeAsync(file.OpenRead(), cancellationToken);
 
             if (monitorDefinition is not null)
             {
-                monitorDefinition.FilePath = file.FullName;
                 monitorDefinitions.Add((file.CreationTime, monitorDefinition));
             }
-            
+
         })).ConfigureAwait(false);
-        
+
         return monitorDefinitions
             .GroupBy(x => x.monitorDefinition.Name)
             .Select(x => x.MaxBy(y => y.creationTime))

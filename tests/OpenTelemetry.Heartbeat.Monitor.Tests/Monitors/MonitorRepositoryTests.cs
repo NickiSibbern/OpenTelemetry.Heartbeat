@@ -14,12 +14,13 @@ public class MonitorRepositoryTests
         string filePath)
     {
         // Arrange & Act
-        sut.AddOrUpdate(filePath, null);
+        var result = sut.AddOrUpdate(filePath, null);
 
         // Assert
+        result.Should().BeFalse();
         sut.Monitors.Should().BeEmpty();
     }
-
+    
     [Theory, AutoNSubstituteData]
     public void AddOrUpdate_Should_Add_Monitor_If_Key_Does_Not_Exists(
         MonitorRepository sut,
@@ -30,9 +31,10 @@ public class MonitorRepositoryTests
         sut.AddOrUpdate("foo", preExistingMonitor);
 
         // Act
-        sut.AddOrUpdate("/foobar", monitor);
+        var result = sut.AddOrUpdate("/foobar", monitor);
 
         // Assert
+        result.Should().BeTrue();
         sut.Monitors.Should().Contain(monitor);
     }
 
@@ -46,9 +48,10 @@ public class MonitorRepositoryTests
         sut.AddOrUpdate("foo", originalMonitor);
 
         // Act
-        sut.AddOrUpdate("foo", newMonitor);
+        var result = sut.AddOrUpdate("foo", newMonitor);
 
         // Assert
+        result.Should().BeTrue();
         sut.Monitors.Should().OnlyContain(probe => probe == newMonitor);
     }
 

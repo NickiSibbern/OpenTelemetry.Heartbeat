@@ -12,15 +12,16 @@ public class HttpMonitorFactory : IMonitorFactory
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly TelemetrySource _telemetrySource;
-    private readonly HeartbeatSettings _heartbeatSettings;
+    private readonly HeartbeatConfig _heartbeatConfig;
     private readonly IDateTimeService _dateTimeService;
 
-    public HttpMonitorFactory(IDateTimeService dateTimeService, IHttpClientFactory httpClientFactory, TelemetrySource telemetrySource, IOptions<HeartbeatSettings> metricSettings)
+    public HttpMonitorFactory(IDateTimeService dateTimeService, IHttpClientFactory httpClientFactory,
+        TelemetrySource telemetrySource, IOptions<HeartbeatConfig> metricConfig)
     {
         _dateTimeService = dateTimeService;
         _httpClientFactory = httpClientFactory;
         _telemetrySource = telemetrySource;
-        _heartbeatSettings = metricSettings.Value;
+        _heartbeatConfig = metricConfig.Value;
     }
 
     public bool CanHandle(MonitorDefinition monitorDefinition)
@@ -32,8 +33,9 @@ public class HttpMonitorFactory : IMonitorFactory
         {
             throw new InvalidOperationException("Cannot create HttpMonitor from non-Http MonitorDefinition");
         }
-        
+
         var httpClient = _httpClientFactory.CreateClient(nameof(HttpMonitor));
-        return new HttpMonitor(monitorDefinition, httpClient, _dateTimeService, _heartbeatSettings, _telemetrySource.Meter);
+        return new HttpMonitor(monitorDefinition, httpClient, _dateTimeService, _heartbeatConfig,
+            _telemetrySource.Meter);
     }
 }

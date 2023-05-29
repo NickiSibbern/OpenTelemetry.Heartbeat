@@ -15,11 +15,11 @@ public sealed class HttpMonitor : MonitorBase
         MonitorDefinition monitorDefinition,
         HttpClient httpClient,
         IDateTimeService dateTime,
-        HeartbeatSettings settings,
+        HeartbeatConfig config,
         Meter meter)
-        : base(monitorDefinition, dateTime, settings, meter)
+        : base(monitorDefinition, dateTime, config, meter)
     {
-        ArgumentNullException.ThrowIfNull(monitorDefinition.Http);
+        ArgumentNullException.ThrowIfNull(monitorDefinition.Monitor);
 
         _monitorDefinition = monitorDefinition;
         _httpClient = httpClient;
@@ -29,14 +29,20 @@ public sealed class HttpMonitor : MonitorBase
     {
         ArgumentNullException.ThrowIfNull(cancellationToken);
 
+        var httpMonitorDefinition = _monitorDefinition.Monitor as HttpMonitorDefinition;
+        if (httpMonitorDefinition is null)
+        {
+            return Result.Fail($"Monitor was expected to be of type {typeof(HttpMonitorDefinition)} but was not");
+        }
+
         return await base.ExecuteMonitorAsync(async () =>
         {
             var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            linkedTokenSource.CancelAfter(_monitorDefinition.Http!.TimeOut);
+            linkedTokenSource.CancelAfter(httpMonitorDefinition.TimeOut);
 
-            var response = await _httpClient.GetAsync(_monitorDefinition.Http!.Url, linkedTokenSource.Token);
+            var response = await _httpClient.GetAsync(httpMonitorDefinition.Url, linkedTokenSource.Token);
 
-            if ((int)response.StatusCode == _monitorDefinition.Http.ResponseCode)
+            if ((int)response.StatusCode == httpMonitorDefinition.ResponseCode)
             {
                 base.UpMetric = 1;
                 return Result.Ok().WithSuccess("Monitor executed successfully");

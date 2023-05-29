@@ -19,16 +19,16 @@ public class HttpMonitorTests
     public void Creation_Should_Throw_If_Http_Object_Is_Null(
         MonitorDefinition monitorDefinition,
         MockHttpMessageHandler mockHttpClient,
-        HeartbeatSettings settings,
+        HeartbeatConfig config,
         IDateTimeService dateTimeService,
         Meter meter)
     {
         // Arrange
-        monitorDefinition.Http = null;
+        monitorDefinition.Monitor = null;
         var httpClient = mockHttpClient.ToHttpClient();
 
         // Act
-        var act = () => new HttpMonitor(monitorDefinition, httpClient, dateTimeService, settings, meter);
+        var act = () => new HttpMonitor(monitorDefinition, httpClient, dateTimeService, config, meter);
 
         // Assert
         act.Should().Throw<ArgumentNullException>();
@@ -50,20 +50,15 @@ public class HttpMonitorTests
     public async Task ExecuteAsync_Should_Cancel_If_Root_Cancellation_Token_Cancels(
         MonitorDefinition monitorDefinition,
         MockHttpMessageHandler mockHttpClient,
-        HeartbeatSettings settings,
+        HeartbeatConfig config,
         IDateTimeService dateTimeService,
         Meter meter,
         CancellationTokenSource cancellationTokenSource,
         Uri requestUri)
     {
         // Arrange
-        monitorDefinition.Http = new HttpMonitorDefinition()
-        {
-            Url = requestUri,
-            TimeOut = 10000,
-            ResponseCode = 200
-        };
-        
+        monitorDefinition.Monitor = new HttpMonitorDefinition { Url = requestUri, TimeOut = 10000, ResponseCode = 200 };
+
         dateTimeService.Now.Returns(DateTimeOffset.Now);
         mockHttpClient.When("*").Respond(HttpStatusCode.Accepted);
         cancellationTokenSource.Cancel();
@@ -73,7 +68,7 @@ public class HttpMonitorTests
             monitorDefinition,
             httpClient,
             dateTimeService,
-            settings,
+            config,
             meter);
 
         // Act
@@ -88,20 +83,18 @@ public class HttpMonitorTests
     public async Task ExecuteAsync_Should_Return_Success_If_HttpResponse_Matched_ResponseStatusCode_From_Definition(
         MonitorDefinition monitorDefinition,
         MockHttpMessageHandler mockHttpClient,
-        HeartbeatSettings settings,
+        HeartbeatConfig config,
         IDateTimeService dateTimeService,
         Meter meter,
         Uri requestUri,
         CancellationToken cancellationToken)
     {
         // Arrange
-        monitorDefinition.Http = new HttpMonitorDefinition()
+        monitorDefinition.Monitor = new HttpMonitorDefinition
         {
-            Url = requestUri,
-            TimeOut = 1000,
-            ResponseCode = (int)HttpStatusCode.OK
+            Url = requestUri, TimeOut = 1000, ResponseCode = (int)HttpStatusCode.OK
         };
-        
+
         dateTimeService.Now.Returns(DateTimeOffset.Now);
         mockHttpClient.When("*").Respond(HttpStatusCode.OK);
 
@@ -110,7 +103,7 @@ public class HttpMonitorTests
             monitorDefinition,
             httpClient,
             dateTimeService,
-            settings,
+            config,
             meter);
 
         // Act
@@ -119,25 +112,24 @@ public class HttpMonitorTests
         // Assert
         result.IsSuccess.Should().Be(true);
     }
-    
+
     [Theory, AutoNSubstituteData]
-    public async Task ExecuteAsync_Should_Return_Failure_If_HttpResponse_Does_Not_Match_ResponseStatusCode_From_Definition(
-        MonitorDefinition monitorDefinition,
-        MockHttpMessageHandler mockHttpClient,
-        HeartbeatSettings settings,
-        IDateTimeService dateTimeService,
-        Meter meter,
-        Uri requestUri,
-        CancellationToken cancellationToken)
+    public async Task
+        ExecuteAsync_Should_Return_Failure_If_HttpResponse_Does_Not_Match_ResponseStatusCode_From_Definition(
+            MonitorDefinition monitorDefinition,
+            MockHttpMessageHandler mockHttpClient,
+            HeartbeatConfig config,
+            IDateTimeService dateTimeService,
+            Meter meter,
+            Uri requestUri,
+            CancellationToken cancellationToken)
     {
         // Arrange
-        monitorDefinition.Http = new HttpMonitorDefinition()
+        monitorDefinition.Monitor = new HttpMonitorDefinition
         {
-            Url = requestUri,
-            TimeOut = 1000,
-            ResponseCode = (int)HttpStatusCode.OK
+            Url = requestUri, TimeOut = 1000, ResponseCode = (int)HttpStatusCode.OK
         };
-        
+
         dateTimeService.Now.Returns(DateTimeOffset.Now);
         mockHttpClient.When("*").Respond(HttpStatusCode.InternalServerError);
 
@@ -146,7 +138,7 @@ public class HttpMonitorTests
             monitorDefinition,
             httpClient,
             dateTimeService,
-            settings,
+            config,
             meter);
 
         // Act
@@ -155,27 +147,30 @@ public class HttpMonitorTests
         // Assert
         result.IsSuccess.Should().Be(false);
     }
-    
+
     [Theory, AutoNSubstituteData]
     public async Task ExecuteAsync_Should_Return_Failure_With_Message_When_Reason_Phrase_Is_Not_Set_By_Server(
         MonitorDefinition monitorDefinition,
-        HeartbeatSettings settings,
+        HttpMonitorDefinition httpMonitorDefinition,
+        HeartbeatConfig config,
         IDateTimeService dateTimeService,
         Meter meter,
         MockHttpMessageHandler mockHttpClient,
         CancellationToken cancellationToken)
     {
         // Arrange
+        monitorDefinition.Monitor = httpMonitorDefinition;
         dateTimeService.Now.Returns(DateTimeOffset.Now);
         mockHttpClient.When("*").Respond(_ => new HttpResponseMessage(HttpStatusCode.BadRequest) { ReasonPhrase = "" });
         var httpClient = mockHttpClient.ToHttpClient();
-        var sut = new HttpMonitor(monitorDefinition, httpClient, dateTimeService, settings, meter);
+        var sut = new HttpMonitor(monitorDefinition, httpClient, dateTimeService, config, meter);
 
         // Act
         var result = await sut.ExecuteAsync(cancellationToken);
 
         // Assert
         result.IsSuccess.Should().Be(false);
-        result.Errors.Select(error => error.Message).Should().Contain("Unknown error occurred - reason provided by the server was null");
+        result.Errors.Select(error => error.Message).Should()
+            .Contain("Unknown error occurred - reason provided by the server was null");
     }
 }

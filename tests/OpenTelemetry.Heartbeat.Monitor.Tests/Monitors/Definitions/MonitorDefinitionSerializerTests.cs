@@ -23,8 +23,8 @@ public class MonitorDefinitionSerializerTests
             ""name"": ""Test Monitor"",
             ""namespace"": ""namespace"",
             ""interval"": 300,
-            ""type"": ""http"",
-            ""http"": {
+            ""MonitorType"": ""http"",
+            ""monitor"": {
                 ""timeOut"": 100,
                 ""url"": ""https://localhost"",
                 ""responseCode"": 200
@@ -41,13 +41,16 @@ public class MonitorDefinitionSerializerTests
 
         result!.Name.Should().BeEquivalentTo("Test Monitor");
         result.MonitorType.Should().Be(MonitorDefinitionType.Http);
-        result.Http.Should().NotBeNull();
+        result.Monitor.Should().NotBeNull();
         result.Interval.Should().Be(300);
-        result.Http?.TimeOut.Should().Be(100);
-        result.Http?.ResponseCode.Should().Be(200);
-        result.Http?.Url.Should().BeEquivalentTo(new Uri("https://localhost"));
+
+        var httpMonitorDefinition = result.Monitor as HttpMonitorDefinition;
+
+        httpMonitorDefinition?.TimeOut.Should().Be(100);
+        httpMonitorDefinition?.ResponseCode.Should().Be(200);
+        httpMonitorDefinition?.Url.Should().BeEquivalentTo(new Uri("https://localhost"));
     }
-    
+
 
     [Theory, AutoNSubstituteData]
     public async Task Deserialize_Should_Return_Null_If_Json_Is_Invalid(
@@ -64,14 +67,14 @@ public class MonitorDefinitionSerializerTests
         // Assert
         result.Should().BeNull();
     }
-    
+
     [Theory]
     [InlineAutoNSubstituteData(@"{
             ""name"": ""Test Monitor"",
             ""namespace"": ""namespace"",
             ""interval"": 300,
-            ""type"": ""Unknown"",
-            ""http"": {
+            ""MonitorType"": ""Unknown"",
+            ""monitor"": {
                 ""timeOut"": 100,
                 ""url"": ""https://localhost"",
                 ""responseCode"": 200
@@ -81,7 +84,7 @@ public class MonitorDefinitionSerializerTests
             ""name"": ""Test Monitor"",
             ""namespace"": ""namespace"",
             ""interval"": ""300"",
-            ""type"": ""Http"",       
+            ""MonitorType"": ""Http"",       
         }")]
     public async Task Deserialize_Should_Return_Null_If_Json_Cannot_Be_Deserialized(
         string json,
@@ -100,7 +103,7 @@ public class MonitorDefinitionSerializerTests
 
     [Theory, AutoNSubstituteData]
     public async Task DeserializeAsync_Should_Return_Null_When_Json_Is_Null(
-        [Frozen]ILogger<MonitorDefinitionSerializer> logger,
+        [Frozen] ILogger<MonitorDefinitionSerializer> logger,
         MonitorDefinitionSerializer sut)
     {
         // Arrange && Act

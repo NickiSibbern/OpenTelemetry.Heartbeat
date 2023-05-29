@@ -1,8 +1,7 @@
 # OpenTelemetry.Heartbeat
 A simple worker that Converts files into probes that is exposed as a metric. The file is expected to be a json file with the following format:
 
-
-**HttpMonitor**
+**heartbeat.json**
 ```json
 {
   "name": "My Service",
@@ -22,8 +21,13 @@ the metric will follow the [Otel standard](https://github.com/open-telemetry/ope
 
 when configuring make sure that the `interval` defined in appsettings.heartbeatsettings is greater than the `timeout` specified in the heartbeat.json files, otherwise the worker will not be able to keep up with the probes.
 
+## How to use
+Run the Service and configure the appsettings.json files to point to the folder where the heartbeat.json files are located.
+
+when deploying a new service, call the endpoint POST /monitors to add a new monitor. see swagger for more details.
+
 ## Why
 [OpenTelemetry HttpStatucCheck reciever](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/httpcheckreceiver/documentation.md) required that all urls be known at the deployment time of the collector.   
-This worker is intended to be used where you do not know the urls beforehand and you do not have any service discovery mechanism in place.
+This worker is intended to be used in a setup where you do not know the urls beforehand and you do not have any service discovery mechanism in place.
 
-## How to use
+
