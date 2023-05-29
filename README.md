@@ -25,3 +25,5 @@ when configuring make sure that the `interval` defined in appsettings.heartbeats
 ## Why
 [OpenTelemetry HttpStatucCheck reciever](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/httpcheckreceiver/documentation.md) required that all urls be known at the deployment time of the collector.   
 This worker is intended to be used where you do not know the urls beforehand and you do not have any service discovery mechanism in place.
+
+## How to use

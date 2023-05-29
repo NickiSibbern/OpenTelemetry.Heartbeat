@@ -159,10 +159,10 @@ public class HttpMonitorTests
     [Theory, AutoNSubstituteData]
     public async Task ExecuteAsync_Should_Return_Failure_With_Message_When_Reason_Phrase_Is_Not_Set_By_Server(
         MonitorDefinition monitorDefinition,
-        MockHttpMessageHandler mockHttpClient,
         HeartbeatSettings settings,
         IDateTimeService dateTimeService,
         Meter meter,
+        MockHttpMessageHandler mockHttpClient,
         CancellationToken cancellationToken)
     {
         // Arrange

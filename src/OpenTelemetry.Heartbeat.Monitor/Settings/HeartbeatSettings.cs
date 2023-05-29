@@ -3,14 +3,15 @@ namespace OpenTelemetry.Heartbeat.Monitor.Settings;
 public class HeartbeatSettings
 {
     /// <summary>
-    /// The interval in milliseconds between each job
+    /// The interval in milliseconds between each job, i.e. the time between each run where all monitors are checked if they should be executed.
     /// </summary>
-    public required int JobInterval { get; set; }
+    /// <value>Defaults to 100ms</value>
+    public required int JobInterval { get; set; } = 100;
     
     /// <summary>
     /// The amount of monitors to be run in parallel in each job
     /// </summary>
-    public required int JobBatchSize { get; set; }
+    public required int ConcurrentMonitorChecks { get; set; }
 
     /// <summary>
     /// Name of the metric to expose

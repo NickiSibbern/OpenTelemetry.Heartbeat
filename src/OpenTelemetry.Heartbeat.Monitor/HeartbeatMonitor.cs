@@ -54,7 +54,7 @@ public class HeartbeatMonitor : IHeartbeatMonitor
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        foreach (var batch in _monitorRepository.Monitors.Chunk(_heartbeatSettings.JobBatchSize).ToArray())
+        foreach (var batch in _monitorRepository.Monitors.Chunk(_heartbeatSettings.ConcurrentMonitorChecks).ToArray())
         {
             if (cancellationToken.IsCancellationRequested)
             {
