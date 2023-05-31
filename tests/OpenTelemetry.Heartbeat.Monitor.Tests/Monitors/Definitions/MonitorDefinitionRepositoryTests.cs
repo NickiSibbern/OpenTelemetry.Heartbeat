@@ -3,14 +3,14 @@ using Atc.Test;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
+using NSubstitute.ReturnsExtensions;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Models;
+using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Serialization;
 using OpenTelemetry.Heartbeat.Monitor.Settings;
-using Xunit.Categories;
 
 namespace OpenTelemetry.Heartbeat.Monitor.Tests.Monitors.Definitions;
 
-[UnitTest]
 public class MonitorDefinitionRepositoryTests
 {
     [Theory, AutoNSubstituteData]
@@ -53,7 +53,6 @@ public class MonitorDefinitionRepositoryTests
 
         // Assert
         result.Count.Should().BeGreaterThan(1);
-//        result.Should().Contain(x => x.Name == "service" && x.Interval == 15 && x.Http!.TimeOut == 2);
         result.Should().Contain(x => x.Name == "service" && x.Interval == 15);
         result.Should().Contain(x => x.Name == "another-service");
     }
@@ -85,7 +84,6 @@ public class MonitorDefinitionRepositoryTests
         result.Should().HaveCount(1);
     }
 
-    // Top / sub directories
     [Theory, AutoNSubstituteData]
     public async Task GetFiles_Should_Only_Return_Top_Level_Files_If_IncludeSubDirectories_Is_False(
         IMonitorDefinitionSerializer serializer,
@@ -112,6 +110,32 @@ public class MonitorDefinitionRepositoryTests
         // Assert
         result.Should().HaveCount(1);
     }
+    
+    [Theory, AutoNSubstituteData]
+    public async Task GetFiles_Should_Return_Empty_Collection_If_No_Compatible_Files_Where_Found(
+        IMonitorDefinitionSerializer serializer,
+        MockFileSystem fileSystem,
+        Stream stream,
+        CancellationToken cancellationToken)
+    {
+        // Arrange
+        var options = Options.Create(new SearchConfig
+        {
+            RootDirectory = "/root", SearchPattern = "Heartbeat.json", IncludeSubDirectories = true
+        });
+
+        serializer.DeserializeAsync(stream, cancellationToken).ReturnsNullForAnyArgs();
+
+        fileSystem.AddFile("/root/Heartbeat.json", new MockFileData(string.Empty));
+
+        var sut = new MonitorDefinitionRepository(fileSystem, serializer, options);
+
+        // Act
+        var result = (await sut.GetMonitorDefinitions(cancellationToken)).ToList();
+
+        // Assert
+        result.Should().BeEmpty();
+    }
 
     private static string CreateHttpMonitorJson(string name, string @namespace, int responseCode, int interval,
         int timeout, string url)
@@ -120,8 +144,8 @@ public class MonitorDefinitionRepositoryTests
             ""name"": ""{name}"",
             ""namespace"": ""{@namespace}"",
             ""interval"": {interval},
-            ""MonitorType"": ""Http"",
             ""monitor"": {{
+                ""type"": ""http"",
                 ""ResponseCode"": {responseCode},
                 ""TimeOut"": {timeout},
                 ""Url"": ""{url}""

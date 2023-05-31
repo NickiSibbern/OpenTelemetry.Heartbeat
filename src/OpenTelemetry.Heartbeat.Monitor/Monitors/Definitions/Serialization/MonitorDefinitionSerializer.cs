@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Models;
 
-namespace OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions;
+namespace OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Serialization;
 
 public interface IMonitorDefinitionSerializer
 {
@@ -20,19 +20,22 @@ public sealed class MonitorDefinitionSerializer : IMonitorDefinitionSerializer
 
     public async Task<MonitorDefinition?> DeserializeAsync(Stream json, CancellationToken cancellationToken)
     {
+        var jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            Converters = { new JsonStringEnumConverter(), new MonitorDefinitionConverter() }
+        };
+
         try
         {
             var definition = await JsonSerializer.DeserializeAsync<MonitorDefinition>(
                 json,
-                new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true,
-                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-                    Converters = { new JsonStringEnumConverter() }
-                },
+                jsonOptions,
                 cancellationToken);
 
-            return definition;
+            return definition?.Monitor is null ? null : definition;
+            
         }
         catch (Exception e)
         {

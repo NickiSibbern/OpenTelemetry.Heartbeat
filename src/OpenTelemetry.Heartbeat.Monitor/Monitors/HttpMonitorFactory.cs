@@ -24,12 +24,12 @@ public class HttpMonitorFactory : IMonitorFactory
         _heartbeatConfig = metricConfig.Value;
     }
 
-    public bool CanHandle(MonitorDefinition monitorDefinition)
-        => monitorDefinition.MonitorType == MonitorDefinitionType.Http;
+    public bool CanHandle(MonitorDefinition? monitorDefinition)
+        => monitorDefinition?.Monitor?.Type == MonitorDefinitionType.Http;
 
     public IMonitor Create(MonitorDefinition monitorDefinition)
     {
-        if (monitorDefinition.MonitorType is not MonitorDefinitionType.Http)
+        if (monitorDefinition.Monitor?.Type is not MonitorDefinitionType.Http)
         {
             throw new InvalidOperationException("Cannot create HttpMonitor from non-Http MonitorDefinition");
         }

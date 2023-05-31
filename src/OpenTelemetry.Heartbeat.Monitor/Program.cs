@@ -9,6 +9,7 @@ using OpenTelemetry.Heartbeat.Monitor.Abstractions;
 using OpenTelemetry.Heartbeat.Monitor.Endpoints;
 using OpenTelemetry.Heartbeat.Monitor.Monitors;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions;
+using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Serialization;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Models;
 using OpenTelemetry.Heartbeat.Monitor.Settings;
 using OpenTelemetry.Heartbeat.Monitor.Telemetry;
@@ -31,7 +32,6 @@ builder.Services.TryAddSingleton<IMonitorFactory, HttpMonitorFactory>();
 builder.Services.TryAddSingleton<IHeartbeatMonitor, HeartbeatMonitor>();
 builder.Services.AddHostedService<Worker>();
 
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -39,6 +39,7 @@ builder.Services.Configure<JsonOptions>(options =>
 {
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
+
 builder.Services.Configure<Microsoft.AspNetCore.Mvc.JsonOptions>(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
@@ -60,4 +61,6 @@ app.Run();
 
 // used for testing
 [ExcludeFromCodeCoverage]
-public partial class Program { }
+public partial class Program
+{
+}

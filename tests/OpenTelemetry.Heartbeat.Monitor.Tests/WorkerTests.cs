@@ -3,11 +3,9 @@ using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using OpenTelemetry.Heartbeat.Monitor.Settings;
-using Xunit.Categories;
 
 namespace OpenTelemetry.Heartbeat.Monitor.Tests;
 
-[UnitTest]
 public class WorkerTests
 {
     [Theory, AutoNSubstituteData]

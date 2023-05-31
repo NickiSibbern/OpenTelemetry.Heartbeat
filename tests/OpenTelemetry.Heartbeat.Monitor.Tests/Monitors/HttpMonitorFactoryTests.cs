@@ -9,11 +9,9 @@ using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Models;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Models;
 using OpenTelemetry.Heartbeat.Monitor.Settings;
 using OpenTelemetry.Heartbeat.Monitor.Telemetry;
-using Xunit.Categories;
 
 namespace OpenTelemetry.Heartbeat.Monitor.Tests.Monitors;
 
-[UnitTest]
 public class HttpMonitorFactoryTests
 {
     [Theory, AutoNSubstituteData]
@@ -22,7 +20,7 @@ public class HttpMonitorFactoryTests
         HttpMonitorFactory sut)
     {
         // Arrange
-        monitorDefinition.MonitorType = MonitorDefinitionType.Http;
+        monitorDefinition.Monitor.Type = MonitorDefinitionType.Http;
 
         // Act
         var result = sut.CanHandle(monitorDefinition);
@@ -37,7 +35,7 @@ public class HttpMonitorFactoryTests
         HttpMonitorFactory sut)
     {
         // Arrange
-        monitorDefinition.MonitorType = MonitorDefinitionType.Tcp;
+        monitorDefinition.Monitor.Type = MonitorDefinitionType.Tcp;
 
         // Act
         var result = sut.CanHandle(monitorDefinition);
@@ -52,7 +50,7 @@ public class HttpMonitorFactoryTests
         HttpMonitorFactory sut)
     {
         // Arrange
-        monitorDefinition.MonitorType = MonitorDefinitionType.Tcp;
+        monitorDefinition.Monitor.Type = MonitorDefinitionType.Tcp;
 
         // Act
         Action act = () => sut.Create(monitorDefinition);
@@ -71,7 +69,7 @@ public class HttpMonitorFactoryTests
     {
         // Arrange
         var metricConfigOptions = Options.Create(config);
-        monitorDefinition.MonitorType = MonitorDefinitionType.Http;
+        monitorDefinition.Monitor.Type = MonitorDefinitionType.Http;
 
         var sut = new HttpMonitorFactory(dateTimeService, httpClientFactory, telemetrySource, metricConfigOptions);
         // Act

@@ -1,9 +1,9 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Models;
 
-public class HttpMonitorDefinition
+public class HttpMonitorDefinition : IMonitorDefinition
 {
+    public MonitorDefinitionType Type { get; set; }
+
     /// <summary>
     /// Uri to be called in the monitor.
     /// </summary>

@@ -7,21 +7,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F6B8E35B-2E9
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{11B1D301-1F4D-420C-A35C-A4F7DC1A8D95}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTelemetry.Heartbeat.Monitor", "src\OpenTelemetry.Heartbeat.Monitor\OpenTelemetry.Heartbeat.Monitor.csproj", "{348C6C0B-B778-402E-AF17-EB160A172AF4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.Heartbeat.Monitor", "src\OpenTelemetry.Heartbeat.Monitor\OpenTelemetry.Heartbeat.Monitor.csproj", "{348C6C0B-B778-402E-AF17-EB160A172AF4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTelemetry.Heartbeat.Monitor.Tests", "tests\OpenTelemetry.Heartbeat.Monitor.Tests\OpenTelemetry.Heartbeat.Monitor.Tests.csproj", "{2F23D732-3295-40F3-8AA3-90F740631D8B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.Heartbeat.Monitor.Tests", "tests\OpenTelemetry.Heartbeat.Monitor.Tests\OpenTelemetry.Heartbeat.Monitor.Tests.csproj", "{2F23D732-3295-40F3-8AA3-90F740631D8B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{256E0EB0-2011-4851-981D-D5FBF5DA03D9}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{348C6C0B-B778-402E-AF17-EB160A172AF4} = {F6B8E35B-2E93-43F4-B9CE-036BEC5CF18B}
-		{2F23D732-3295-40F3-8AA3-90F740631D8B} = {11B1D301-1F4D-420C-A35C-A4F7DC1A8D95}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{348C6C0B-B778-402E-AF17-EB160A172AF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -32,5 +30,12 @@ Global
 		{2F23D732-3295-40F3-8AA3-90F740631D8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F23D732-3295-40F3-8AA3-90F740631D8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F23D732-3295-40F3-8AA3-90F740631D8B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{348C6C0B-B778-402E-AF17-EB160A172AF4} = {F6B8E35B-2E93-43F4-B9CE-036BEC5CF18B}
+		{2F23D732-3295-40F3-8AA3-90F740631D8B} = {11B1D301-1F4D-420C-A35C-A4F7DC1A8D95}
 	EndGlobalSection
 EndGlobal

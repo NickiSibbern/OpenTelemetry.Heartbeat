@@ -6,30 +6,41 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Models;
-using Xunit.Categories;
+using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Serialization;
 
-namespace OpenTelemetry.Heartbeat.Monitor.Tests.Monitors.Definitions;
+namespace OpenTelemetry.Heartbeat.Monitor.Tests.Monitors.Definitions.Serialization;
 
-[UnitTest]
 public class MonitorDefinitionSerializerTests
 {
-    [Theory, AutoNSubstituteData]
-    public async Task Deserialize_Should_Return_MonitorDefinition_When_Json_Is_Valid_HttpMonitor(
-        MonitorDefinitionSerializer sut,
-        CancellationToken cancellationToken)
-    {
-        // Arrange
-        const string json = @"{
+    [Theory]
+    [InlineAutoNSubstituteData(@"{
             ""name"": ""Test Monitor"",
             ""namespace"": ""namespace"",
             ""interval"": 300,
-            ""MonitorType"": ""http"",
             ""monitor"": {
+                ""type"": ""http"",
                 ""timeOut"": 100,
                 ""url"": ""https://localhost"",
                 ""responseCode"": 200
             }
-        }";
+        }")]
+    [InlineAutoNSubstituteData(@"{
+            ""name"": ""Test Monitor"",
+            ""namespace"": ""namespace"",
+            ""interval"": 300,
+            ""monitor"": {
+                ""type"": 0,
+                ""timeOut"": 100,
+                ""url"": ""https://localhost"",
+                ""responseCode"": 200
+            }
+        }")]
+    public async Task Deserialize_Should_Return_MonitorDefinition_When_Json_Is_Valid_HttpMonitor(
+        string json,
+        MonitorDefinitionSerializer sut,
+        CancellationToken cancellationToken)
+    {
+        // Arrange
         using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
 
         // Act
@@ -40,15 +51,13 @@ public class MonitorDefinitionSerializerTests
         result.Should().BeAssignableTo<MonitorDefinition>();
 
         result!.Name.Should().BeEquivalentTo("Test Monitor");
-        result.MonitorType.Should().Be(MonitorDefinitionType.Http);
-        result.Monitor.Should().NotBeNull();
+        result.Monitor.Type.Should().Be(MonitorDefinitionType.Http);
         result.Interval.Should().Be(300);
 
         var httpMonitorDefinition = result.Monitor as HttpMonitorDefinition;
-
-        httpMonitorDefinition?.TimeOut.Should().Be(100);
-        httpMonitorDefinition?.ResponseCode.Should().Be(200);
-        httpMonitorDefinition?.Url.Should().BeEquivalentTo(new Uri("https://localhost"));
+        httpMonitorDefinition!.TimeOut.Should().Be(100);
+        httpMonitorDefinition!.ResponseCode.Should().Be(200);
+        httpMonitorDefinition!.Url.Should().BeEquivalentTo(new Uri("https://localhost"));
     }
 
 
@@ -73,8 +82,8 @@ public class MonitorDefinitionSerializerTests
             ""name"": ""Test Monitor"",
             ""namespace"": ""namespace"",
             ""interval"": 300,
-            ""MonitorType"": ""Unknown"",
             ""monitor"": {
+                ""type"": ""Unknown"",
                 ""timeOut"": 100,
                 ""url"": ""https://localhost"",
                 ""responseCode"": 200
@@ -84,7 +93,9 @@ public class MonitorDefinitionSerializerTests
             ""name"": ""Test Monitor"",
             ""namespace"": ""namespace"",
             ""interval"": ""300"",
-            ""MonitorType"": ""Http"",       
+            ""monitor"": {
+                ""foo"": 100               
+            }
         }")]
     public async Task Deserialize_Should_Return_Null_If_Json_Cannot_Be_Deserialized(
         string json,

@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.IO.Abstractions;
 using Microsoft.Extensions.Options;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Models;
+using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Serialization;
 using OpenTelemetry.Heartbeat.Monitor.Settings;
 
 namespace OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions;

@@ -1,11 +1,9 @@
 using Atc.Test;
 using FluentAssertions;
 using OpenTelemetry.Heartbeat.Monitor.Monitors;
-using Xunit.Categories;
 
 namespace OpenTelemetry.Heartbeat.Monitor.Tests.Monitors;
 
-[UnitTest]
 public class MonitorRepositoryTests
 {
     [Theory, AutoNSubstituteData]

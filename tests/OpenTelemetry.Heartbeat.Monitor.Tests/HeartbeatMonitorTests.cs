@@ -10,11 +10,9 @@ using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Models;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Models;
 using OpenTelemetry.Heartbeat.Monitor.Settings;
 using OpenTelemetry.Heartbeat.Monitor.Tests.TestHelpers;
-using Xunit.Categories;
 
 namespace OpenTelemetry.Heartbeat.Monitor.Tests;
 
-[UnitTest]
 public class HeartbeatMonitorTests
 {
     [Theory, AutoNSubstituteData]

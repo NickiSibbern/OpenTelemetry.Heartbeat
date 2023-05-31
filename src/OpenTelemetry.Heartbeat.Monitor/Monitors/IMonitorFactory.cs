@@ -4,7 +4,7 @@ namespace OpenTelemetry.Heartbeat.Monitor.Monitors;
 
 public interface IMonitorFactory
 {
-    bool CanHandle(MonitorDefinition monitorDefinition);
+    bool CanHandle(MonitorDefinition? monitorDefinition);
     
     IMonitor Create(MonitorDefinition monitorDefinition);
 }

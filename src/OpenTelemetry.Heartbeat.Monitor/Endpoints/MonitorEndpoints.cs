@@ -21,8 +21,8 @@ public static class MonitorEndpoints
             {
                 var factory = monitorFactories.FirstOrDefault(x => x.CanHandle(monitorDefinition));
                 if (factory is null)
-                {
-                    return Results.BadRequest($"Unable to handle monitor definition, no factory for {monitorDefinition.MonitorType} found");
+                {   
+                    return Results.BadRequest("Unable to handle monitor definition");
                 }
 
                 var monitor = factory.Create(monitorDefinition);

@@ -8,11 +8,9 @@ using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Models;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Models;
 using OpenTelemetry.Heartbeat.Monitor.Settings;
 using RichardSzalay.MockHttp;
-using Xunit.Categories;
 
 namespace OpenTelemetry.Heartbeat.Monitor.Tests.Monitors.Models;
 
-[UnitTest]
 public class HttpMonitorTests
 {
     [Theory, AutoNSubstituteData]

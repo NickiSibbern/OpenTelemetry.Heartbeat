@@ -9,11 +9,9 @@ using NSubstitute;
 using OpenTelemetry.Heartbeat.Monitor.Monitors;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Definitions.Models;
 using OpenTelemetry.Heartbeat.Monitor.Monitors.Models;
-using Xunit.Categories;
 
 namespace OpenTelemetry.Heartbeat.Monitor.Tests.Endpoints;
 
-[IntegrationTest]
 public class MonitorEndpointTests
 {
     private readonly JsonSerializerOptions _defaultOptions = new()
@@ -53,9 +51,12 @@ public class MonitorEndpointTests
     internal async Task Post_Should_Return_Add_MonitorDefinition_And_Return_OkResult(
         MonitorRepository monitorRepository,
         MonitorDefinition monitorDefinition,
+        HttpMonitorDefinition httpMonitorDefinition,
         CancellationToken cancellationToken)
     {
         // Arrange
+        monitorDefinition.Monitor = httpMonitorDefinition;
+
         await using var app = new TestApplication(builder =>
         {
             builder.ConfigureServices(services =>
@@ -81,8 +82,7 @@ public class MonitorEndpointTests
         // Arrange
         await using var app = new TestApplication();
         using var client = app.CreateClient();
-        var monitorType = 1000000;
-        var content = JsonContent.Create(new { Name = "foo", Namespace = "ns", MonitorType = $"{monitorType}", Interval = 98, Monitor = "foo" }, options: _defaultOptions);
+        var content = JsonContent.Create(new { Name = "foo", Namespace = "ns", Interval = 98, Monitor = new { Type = "foo", } });
 
         // Act
         var response = await client.PostAsync(
@@ -92,10 +92,10 @@ public class MonitorEndpointTests
 
         // Assert
         var reason = await response.Content.ReadFromJsonAsync<string>(_defaultOptions, cancellationToken);
-        reason.Should().Be($"Unable to handle monitor definition, no factory for {monitorType} found");
+        reason.Should().Be("Unable to handle monitor definition");
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
-    
+
     [Theory, AutoNSubstituteData]
     internal async Task Remove_Should_Remove_Monitor_With_Key_And_Return_OkResult(
         MonitorRepository monitorRepository,
@@ -111,10 +111,10 @@ public class MonitorEndpointTests
                 services.AddSingleton<IMonitorRepository>(monitorRepository);
             });
         });
-        
+
         monitorRepository.AddOrUpdate("foo", monitor);
         monitorRepository.AddOrUpdate("bar", toDeleteMonitor);
-        
+
         using var client = app.CreateClient();
 
         // Act
